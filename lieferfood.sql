@@ -11434,7 +11434,7 @@ CREATE TABLE `orders` (
   `delivery_price` decimal(8,2) NOT NULL DEFAULT 0.00,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `uid` uuid NOT NULL DEFAULT uuid(),
+  `uid` varchar(36) DEFAULT NULL,
   `confirmed_at` datetime DEFAULT NULL,
   `preparing_at` datetime DEFAULT NULL,
   `out_for_delivery_at` datetime DEFAULT NULL,

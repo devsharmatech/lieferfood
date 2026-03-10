@@ -15,17 +15,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthenticationController::class)->prefix('v1/vendor/')->group(function () {
     Route::post('get-information', 'getInformation');
-    
-});    
+
+});
 Route::controller(AuthenticationController::class)->prefix('v1/auth/')->group(function () {
-    Route::post('login', 'login');
-    Route::post('signup', 'register');
+    Route::post('login', 'login')->middleware('throttle:5,1');
+    Route::post('signup', 'register')->middleware('throttle:5,1');
     Route::post('forget-password', 'forgetPassword');
     Route::post('change-password', 'changePassword');
 });
 Route::middleware(['throttle:winorder'])->group(function () {
-  Route::get('/winorder', [WinOrderController::class, 'orders']);
-  Route::post('/winorder', [WinOrderController::class, 'updateStatus']);
+    Route::get('/winorder', [WinOrderController::class, 'orders']);
+    Route::post('/winorder', [WinOrderController::class, 'updateStatus']);
 });
 Route::controller(CustomerController::class)->prefix('v1/customer/')->group(function () {
     Route::post('update-profile-picture', 'updateProfilePicture');
@@ -56,11 +56,11 @@ Route::controller(OrderApiController::class)->prefix('v1/feedback/')->group(func
     Route::post('/add-my-feedback', 'storeReview')->name('storeReview.api');
 });
 Route::controller(NotificationController::class)->prefix('v1/notification')->group(function () {
-    Route::post('list', 'getNotifications')->name('notification-list-get');           
-    Route::post('read', 'markNotificationRead')->name('notification-read');       
-    Route::post('notification-unread-count', 'getUnreadCount')->name('notification-unread-count');       
-    Route::post('delete', 'deleteNotification')->name('notification-delete');       
-    Route::post('clear', 'clearAllNotifications')->name('notification-clear');     
-    Route::post('test-notification', 'testNotification');     
-    Route::post('update-device/token', 'updateToken')->name('update-device');     
+    Route::post('list', 'getNotifications')->name('notification-list-get');
+    Route::post('read', 'markNotificationRead')->name('notification-read');
+    Route::post('notification-unread-count', 'getUnreadCount')->name('notification-unread-count');
+    Route::post('delete', 'deleteNotification')->name('notification-delete');
+    Route::post('clear', 'clearAllNotifications')->name('notification-clear');
+    Route::post('test-notification', 'testNotification');
+    Route::post('update-device/token', 'updateToken')->name('update-device');
 });

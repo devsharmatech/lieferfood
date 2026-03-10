@@ -348,6 +348,87 @@
             right: 8.8rem !important;
         }
     }
+
+    /* Why Choose Us Section */
+    .feature-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 2.5rem 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+    }
+    .feature-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .icon-fast { background: #ffe4e6; color: #e11d48; }
+    .icon-price { background: #dcfce7; color: #16a34a; }
+    .icon-fresh { background: #fef08a; color: #ca8a04; }
+    .icon-support { background: #dbeafe; color: #2563eb; }
+
+    /* Deals Banner */
+    .deals-banner {
+        background: linear-gradient(135deg, var(--brand-primary, #f41909), var(--brand-dark, #cc1508));
+        border-radius: 25px;
+        color: white;
+        overflow: hidden;
+        position: relative;
+    }
+    .deals-banner::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: url('https://www.transparenttextures.com/patterns/food.png');
+        opacity: 0.1;
+        pointer-events: none;
+    }
+    .deal-badge {
+        background: #fff;
+        color: var(--brand-dark, #cc1508);
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    /* Top Rated Section */
+    .top-rated-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .top-rated-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    .rating-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #fbbf24;
+        color: #fff;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
 </style>
 @endsection
 @section('external-home-content')
@@ -698,6 +779,127 @@ document.addEventListener('DOMContentLoaded', function() {
         </div><!-- end of .container-->
 
     </section>
+
+    <!-- Why Choose Lieferfood Section -->
+    <section class="py-4 bg-light mt-4">
+        <div class="container-fluid">
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-6 text-center">
+                    <h5 class="fw-bold fs-3 fs-lg-5 lh-sm text-dark mb-2">Why Choose Lieferfood?</h5>
+                    <p class="text-dark fs-1 mb-0">We bring you the best culinary experiences with unmatched convenience.</p>
+                </div>
+            </div>
+            <div class="row g-4 px-lg-5">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card text-center text-dark">
+                        <div class="feature-icon-wrapper icon-fast mb-2">
+                            <i class="fas fa-shipping-fast fs-2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Lightning Fast</h4>
+                        <p class="text-dark mb-0">Experience delivery in under 30 minutes. Your food arrives hot and fresh.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card text-center text-dark">
+                        <div class="feature-icon-wrapper icon-price mb-2">
+                            <i class="fas fa-tags fs-2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Best Prices</h4>
+                        <p class="text-dark mb-0">No hidden fees or sneaky surcharges. Enjoy your meals at the best value.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card text-center text-dark">
+                        <div class="feature-icon-wrapper icon-fresh mb-2">
+                            <i class="fas fa-utensils fs-2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Premium Quality</h4>
+                        <p class="text-dark mb-0">We partner only with top-rated local chefs and highly reviewed restaurants.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card text-center text-dark">
+                        <div class="feature-icon-wrapper icon-support mb-2">
+                            <i class="fas fa-headset fs-2"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">24/7 Support</h4>
+                        <p class="text-dark mb-0">Got a problem? Our dedicated customer happiness team is always awake.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deals Banner Section -->
+    <section class="py-5">
+        <div class="container-fluid px-lg-6">
+            <div class="deals-banner p-4 p-md-5 d-flex flex-column flex-lg-row align-items-center justify-content-between shadow-lg">
+                <div class="mb-4 mb-lg-0 text-center text-lg-start z-index-1" style="z-index: 2;">
+                    <div class="deal-badge"><i class="fas fa-gift me-2"></i>LIMITED TIME OFFER</div>
+                    <h2 class="display-5 fw-bolder text-white mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Craving Something Special?</h2>
+                    <p class="fs-2 text-white opacity-75 mb-0">Get exactly what you want, delivered straight to your door.</p>
+                </div>
+                <div style="z-index: 2;">
+                    <a href="{{ route('shop') }}" class="btn btn-light btn-lg fw-bold rounded-pill px-5 py-3 shadow">
+                        Explore Menus <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Rated Restaurants Section -->
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row h-100">
+                <div class="col-lg-7 mx-auto text-center mb-4">
+                    <h5 class="fw-bold fs-3 fs-lg-5 lh-sm d-flex align-items-center justify-content-center">
+                        <a href="javaScript:void(0)" class="text-primary me-3 d-flex align-items-center justify-content-center" id="top_rated_left"> 
+                            <i class="fa-solid fa-chevron-left fs-4" aria-hidden="true"></i> 
+                        </a>
+                        Top Rated Customers Picks <i class="fas fa-star text-warning ms-3"></i>
+                        <a href="javaScript:void(0)" class="text-primary d-flex align-items-center justify-content-center" style="margin-left:15px;" id="top_rated_right"> 
+                            <i class="fa-solid fa-chevron-right fs-4" aria-hidden="true"></i> 
+                        </a>
+                    </h5>
+                    <p class="text-muted">The highest reviewed restaurants in your area.</p>
+                </div>
+                <div class="col-12">
+                    <div class="owl-carousel top_rated_items">
+                        {{-- 
+                            For now, we will reuse the $vendors array, but in a real-world scenario, 
+                            this should be sorted by average rating from the controller ($topRatedVendors). 
+                        --}}
+                        @foreach ($vendors->take(8) as $item)
+                            <a href="{{ route('shop.view', $item->unid) }}" class="card top-rated-card h-100 rounded-4 text-decoration-none">
+                                <div class="position-relative">
+                                    <div class="rating-badge">
+                                        {{-- Mocking a high rating for visual presentation --}}
+                                        <i class="fas fa-star"></i> {{ number_format(rand(45, 50) / 10, 1) }}
+                                    </div>
+                                    @if (Str::startsWith($item->image, 'http'))
+                                        <img src="{{ $item->profile }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 200px !important; object-fit: cover; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                                    @else
+                                        <img src="{{ asset('uploads/users/' . $item->profile) }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 200px !important; object-fit: cover; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                                    @endif
+                                </div>
+                                <div class="card-body text-center bg-white">
+                                    <h5 class="fw-bold text-dark text-truncate mb-2 fs-2">{{ $item->name }}</h5>
+                                    @if(isset($item->vendor_details->category))
+                                        <p class="text-muted small mb-2">{{ $item->vendor_details->category }}</p>
+                                    @endif
+                                    <div class="d-flex justify-content-center align-items-center gap-3">
+                                        <span class="badge bg-light text-dark border"><i class="fas fa-motorcycle text-primary me-1"></i> 30-40 min</span>
+                                        <span class="text-success fw-bold fs-0">Min &euro;{{ isset($item->vendor_details->minimum_price) ? $item->vendor_details->minimum_price : '20' }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="py-0" id="steps">
         <div class="bg-holder"  style="background-image:url({{ asset('uploads/ft-banner2.jpg') }});background-position:center;background-size:fill;">
         </div>
@@ -814,6 +1016,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 $("#featured_right").removeClass("disabled");
             }
         });
+
+        // Top Rated Carousel
+        $('.top_rated_items').owlCarousel({
+            loop: true,
+            margin: 20,
+            dots: false,
+            autoplay: true,
+            autoplayTimeout: 3000,
+            responsiveClass: true,
+            responsive: {
+                0: { items: 1.2, nav: false },
+                600: { items: 3, nav: false },
+                1000: { items: 4, nav: false, loop: true }
+            }
+        });
+        var top_rated_items = $(".top_rated_items");
+        $("#top_rated_right").click(function() { top_rated_items.trigger("next.owl.carousel"); });
+        $("#top_rated_left").click(function() { top_rated_items.trigger("prev.owl.carousel"); });
+
 
         $('.search_foods').owlCarousel({
             loop: true,

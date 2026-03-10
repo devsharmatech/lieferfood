@@ -25,6 +25,7 @@ use App\Http\Controllers\FoodSubItemController;
 use App\Http\Controllers\global\DeliveryAreaController;
 use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\TableServiceController;
 use App\Http\Controllers\UserController;
@@ -38,10 +39,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/vendor/login', [AdminAuthController::class, 'loginVendor'])->name('vendor.login');
-Route::post('/vendor/login', [AdminAuthController::class, 'signinVendor'])->name('vendor.signin');
+Route::post('/vendor/login', [AdminAuthController::class, 'signinVendor'])->name('vendor.signin')->middleware('throttle:5,1');
 
 Route::get('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
-Route::post('/admin/login', [AdminAuthController::class, 'signin'])->name('admin.signin');
+Route::post('/admin/login', [AdminAuthController::class, 'signin'])->name('admin.signin')->middleware('throttle:5,1');
 
 Route::get('login/google', [SocialiteController::class, 'redirectToGoogle']);
 Route::get('login/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
@@ -51,11 +52,11 @@ Route::middleware(['role:admin'])->group(function () {
   });
   Route::get('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
   Route::controller(customerAuthController::class)->group(function () {
-     Route::get('/delete/{id}/account', 'delete_profile')->name('delete_profile');
+    Route::get('/delete/{id}/account', 'delete_profile')->name('delete_profile');
   });
-  Route::get('/admin/dashboard', [AdminAuthController::class,'dashboard'])->name('admin.dashboard');
+  Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin.dashboard');
 
-   Route::controller(VendorController::class)->prefix('admin')->group(function () {
+  Route::controller(VendorController::class)->prefix('admin')->group(function () {
     Route::get('/all-vendor', 'index')->name('admin.all.vendor');
     Route::get('/add-vendor', 'create')->name('admin.create.vendor');
     Route::post('/add-vendor', 'store')->name('admin.store.vendor');
@@ -66,10 +67,10 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/vendors/{vendor}/document/delete', 'deleteThisDocument')->name('vendors.delete.document');
     Route::get('/vendor/add/document', 'addVendorDocument')->name('vendors.add.document');
     Route::get('/vendors/documents', 'vendorDocuments')->name('vendors.show.document');
-    Route::post('/vendor/upload/document','uploadDocument')->name('vendors.upload.document');
+    Route::post('/vendor/upload/document', 'uploadDocument')->name('vendors.upload.document');
     Route::get('/vendors/{vendor}/permissions', 'permissions')->name('vendors.permissions');
-    Route::post('/vendors/{vendor}/permissions','updatePermissions');
-    Route::post('/impersonate/{vendorId}','impersonateVendor')->name('admin.impersonate');
+    Route::post('/vendors/{vendor}/permissions', 'updatePermissions');
+    Route::post('/impersonate/{vendorId}', 'impersonateVendor')->name('admin.impersonate');
   });
 
   Route::controller(CategoryController::class)->prefix('admin')->group(function () {
@@ -165,7 +166,7 @@ Route::middleware(['role:admin'])->group(function () {
 
 // vendor route
 Route::middleware(['role:vendor'])->group(function () {
-Route::controller(VendorController::class)->prefix('vendor')->group(function () {
+  Route::controller(VendorController::class)->prefix('vendor')->group(function () {
     Route::get('/dashboard', 'dashboard')->name('vendor.dashboard');
     Route::get('/my-profile', 'editVendorProfile')->name('vendor.my.profile');
     Route::post('/update-profile', 'updateVendorProfile')->name('update.profile.vendor')->middleware(['permission']);
@@ -173,11 +174,11 @@ Route::controller(VendorController::class)->prefix('vendor')->group(function () 
     Route::get('/logout', 'logout')->name('logout.vendor');
     Route::post('/return', 'returnToAdmin')->name('admin.return')->middleware(['permission']);
     Route::post('/update-location', 'updateVendorLocation')->name('update.location.vendor');
-});
- Route::controller(foodReviewController::class)->prefix('vendor')->group(function () {
+  });
+  Route::controller(foodReviewController::class)->prefix('vendor')->group(function () {
     Route::get('/food-review', 'vendorReviews')->name('vendor.food.reviews');
   });
-Route::controller(CategoryController::class)->prefix('vendor')->group(function () {
+  Route::controller(CategoryController::class)->prefix('vendor')->group(function () {
     Route::get('/all/category', 'allCategory')->name('vendor.all.category')->middleware(['permission']);
     Route::get('/add/category', 'addCategory')->name('vendor.create.category')->middleware(['permission']);
     Route::get('/edit/category/{id}', 'editCategory')->name('vendor.edit.food.category')->middleware(['permission']);
@@ -186,9 +187,9 @@ Route::controller(CategoryController::class)->prefix('vendor')->group(function (
     Route::post('/store/category', 'storeCategory')->name('vendor.store.food.category')->middleware(['permission']);
     Route::post('/update/category', 'updateVendorCategory')->name('vendor.update.food.category')->middleware(['permission']);
     Route::post('/update/category/order', 'updateSortOrder')->name('vendor.update.sort.category')->middleware(['permission']);
-});
+  });
 
-Route::controller(VendorFoodItemsController::class)->prefix('vendor')->group(function () {
+  Route::controller(VendorFoodItemsController::class)->prefix('vendor')->group(function () {
     Route::get('/all-foods', 'index')->name('vendor.all.foods');
     Route::get('/new-food', 'create')->name('vendor.add.food')->middleware(['permission']);
     Route::post('/new-food', 'store')->name('vendor.store.food')->middleware(['permission']);
@@ -205,16 +206,16 @@ Route::controller(VendorFoodItemsController::class)->prefix('vendor')->group(fun
     Route::get('/all-payments', 'payments')->name('vendor.all.payments');
     Route::get('/revenues', 'revenues')->name('vendor.all.revenues');
     Route::post('/menu-status', 'menuAvailable')->name('vendor.change.status')->middleware(['permission']);
-});
+  });
 
-Route::controller(extraItemController::class)->prefix('vendor')->group(function () {
+  Route::controller(extraItemController::class)->prefix('vendor')->group(function () {
     Route::get('/edit/extra/{id?}', 'getExtra')->name('vendor.edit.extra')->middleware(['permission']);
     Route::put('/update/extra/{id?}', 'saveExtra')->name('vendor.update.extra')->middleware(['permission']);
     Route::get('/delete/extra/{id?}', 'deleteExtra')->name('vendor.delete.extra')->middleware(['permission']);
     Route::post('/add/extra', 'saveExtra')->name('vendor.save.extra')->middleware(['permission']);
-});
+  });
 
-Route::controller(CollectionsController::class)->prefix('vendor')->group(function () {
+  Route::controller(CollectionsController::class)->prefix('vendor')->group(function () {
     Route::get('/all-type/{id?}', 'typeIndex')->name('vendor.all.types')->middleware(['permission']);
     Route::get('/collections', 'index')->name('vendor.collections');
     Route::get('/collection/{id}', 'editCollection')->name('vendor.edit.collection')->middleware(['permission']);
@@ -222,9 +223,9 @@ Route::controller(CollectionsController::class)->prefix('vendor')->group(functio
     Route::get('/delete/collection/{id}', 'deleteCollection')->name('vendor.delete.collection')->middleware(['permission']);
     Route::post('/update-collection', 'createUpdateCollection')->name('vendor.create.collection')->middleware(['permission']);
     Route::post('/add-type', 'updateType')->name('vendor.create.type')->middleware(['permission']);
-});
+  });
 
-Route::controller(VendorOffersController::class)->prefix('vendor')->group(function () {
+  Route::controller(VendorOffersController::class)->prefix('vendor')->group(function () {
     Route::get('/offers', 'index')->name('vendor.offer');
     Route::get('/add-offer', 'addNew')->name('vendor.create.offer')->middleware(['permission']);
     Route::get('/{id}/edit-offer', 'edit')->name('vendor.edit.offer')->middleware(['permission']);
@@ -232,34 +233,34 @@ Route::controller(VendorOffersController::class)->prefix('vendor')->group(functi
     Route::post('/add-offer', 'store')->name('vendor.store.offer')->middleware(['permission']);
     Route::post('/update-offer', 'update')->name('vendor.update.offer')->middleware(['permission']);
     Route::post('/update-offer-status', 'updateStatus')->name('vendor.change.status.offer')->middleware(['permission']);
-});
-
-Route::controller(TableServiceController::class)->prefix('vendor')->group(function () {
-Route::get('/table-service', 'tableService')->name('vendor.table.service');
-Route::get('/time-slots', 'timeSlots')->name('vendor.table.slots');
-Route::get('/add-slot', 'createSlot')->name('vendor.create.slot')->middleware(['permission']);
-Route::get('/{id}/table-service/image-delete', 'delete')->name('vendor.table.delete.image')->middleware(['permission']);
-Route::get('/{id}/delete/slot', 'deleteSlot')->name('vendor.delete.slot')->middleware(['permission']);
-Route::get('/{id}/status/change', 'changeStatus')->name('vendor.change.status.slot')->middleware(['permission']);
-Route::post('/table-service', 'tableServiceStore')->name('vendor.store.table-service')->middleware(['permission']);
-Route::post('/add-slot', 'addSlot')->name('vendor.add.slot')->middleware(['permission']);
-Route::get('/slot-offers', 'slotOffers')->name('vendor.slot.offers');
-Route::get('/add-slot-offer', 'createOffer')->name('vendor.create.slot.offer')->middleware(['permission']);
-Route::post('/store-slot-offer', 'storeSlotOffer')->name('vendor.store.slot.offer')->middleware(['permission']);
-Route::post('/update-slot-offer', 'updateSlotOffer')->name('vendor.update.slot.offer')->middleware(['permission']);
-Route::get('/{id}/delete/slot/offer', 'deleteSlotOffer')->name('vendor.delete.slot.offer')->middleware(['permission']);
-Route::post('/change/slot/offer-status', 'changeStatusSlotOffer')->name('vendor.change.slot.offer.status')->middleware(['permission']);
-Route::get('/{id}/edit/slot/offer', 'editSlotOffer')->name('vendor.edit.slot.offer')->middleware(['permission']);
-Route::get('/table-foods', 'tableFoods')->name('vendor.table.foods');
-Route::get('/add-table-food', 'addTableFood')->name('vendor.add-table.food')->middleware(['permission']);
-Route::get('/edit-table-food/{id}', 'editTableFood')->name('vendor.edit-table.food')->middleware(['permission']);
-Route::post('/add-table-food', 'storeTableFood')->name('vendor.store-table.food')->middleware(['permission']);
-Route::delete('/delete-table-food/{id}', 'deleteTableFood')->name('vendor.delete-table.food')->middleware(['permission']);
-Route::post('/update-table-food', 'updateTableFood')->name('vendor.update-table.food')->middleware(['permission']);
-Route::get('/table-bookings', 'getTableBooking')->name('vendor.table.bookings');
-Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableStatusChange')->middleware(['permission']);
   });
-  
+
+  Route::controller(TableServiceController::class)->prefix('vendor')->group(function () {
+    Route::get('/table-service', 'tableService')->name('vendor.table.service');
+    Route::get('/time-slots', 'timeSlots')->name('vendor.table.slots');
+    Route::get('/add-slot', 'createSlot')->name('vendor.create.slot')->middleware(['permission']);
+    Route::get('/{id}/table-service/image-delete', 'delete')->name('vendor.table.delete.image')->middleware(['permission']);
+    Route::get('/{id}/delete/slot', 'deleteSlot')->name('vendor.delete.slot')->middleware(['permission']);
+    Route::get('/{id}/status/change', 'changeStatus')->name('vendor.change.status.slot')->middleware(['permission']);
+    Route::post('/table-service', 'tableServiceStore')->name('vendor.store.table-service')->middleware(['permission']);
+    Route::post('/add-slot', 'addSlot')->name('vendor.add.slot')->middleware(['permission']);
+    Route::get('/slot-offers', 'slotOffers')->name('vendor.slot.offers');
+    Route::get('/add-slot-offer', 'createOffer')->name('vendor.create.slot.offer')->middleware(['permission']);
+    Route::post('/store-slot-offer', 'storeSlotOffer')->name('vendor.store.slot.offer')->middleware(['permission']);
+    Route::post('/update-slot-offer', 'updateSlotOffer')->name('vendor.update.slot.offer')->middleware(['permission']);
+    Route::get('/{id}/delete/slot/offer', 'deleteSlotOffer')->name('vendor.delete.slot.offer')->middleware(['permission']);
+    Route::post('/change/slot/offer-status', 'changeStatusSlotOffer')->name('vendor.change.slot.offer.status')->middleware(['permission']);
+    Route::get('/{id}/edit/slot/offer', 'editSlotOffer')->name('vendor.edit.slot.offer')->middleware(['permission']);
+    Route::get('/table-foods', 'tableFoods')->name('vendor.table.foods');
+    Route::get('/add-table-food', 'addTableFood')->name('vendor.add-table.food')->middleware(['permission']);
+    Route::get('/edit-table-food/{id}', 'editTableFood')->name('vendor.edit-table.food')->middleware(['permission']);
+    Route::post('/add-table-food', 'storeTableFood')->name('vendor.store-table.food')->middleware(['permission']);
+    Route::delete('/delete-table-food/{id}', 'deleteTableFood')->name('vendor.delete-table.food')->middleware(['permission']);
+    Route::post('/update-table-food', 'updateTableFood')->name('vendor.update-table.food')->middleware(['permission']);
+    Route::get('/table-bookings', 'getTableBooking')->name('vendor.table.bookings');
+    Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableStatusChange')->middleware(['permission']);
+  });
+
   Route::controller(variantController::class)->prefix('vendor')->group(function () {
     Route::get('/edit/variant/{id?}', 'getVariant')->name('vendor.edit.variant')->middleware(['permission']);
     Route::put('/update/variant/{id?}', 'saveVariant')->name('vendor.update.variant')->middleware(['permission']);
@@ -293,7 +294,7 @@ Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableSta
     Route::get('/delivery-area/{id?}', 'editDeliveryArea')->name('vendor.edit.delivery-area')->middleware(['permission']);
     Route::post('/update-delivery-area', 'saveDeliveryAreaChange')->name('vendor.update.delivery-area')->middleware(['permission']);
     Route::post('/update-delivery-area-status', 'updateStatus')->name('vendor.update.delivery-area-status')->middleware(['permission']);
-    
+
     Route::get('/delivery-charges', 'deliveryChargeManager')->name('vendor.all.delivery-charge');
     Route::post('/delivery-charge', 'saveDeliveryCharge')->name('vendor.save.delivery-charge')->middleware(['permission']);
     Route::delete('/delivery-charge/{id?}', 'destroyRange')->name('vendor.delete.delivery-charge')->middleware(['permission']);
@@ -316,15 +317,15 @@ Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableSta
     Route::put('/custome-delivery-status/{id?}', 'updateDeliverStatusCustome')->name('vendor.update.delivery_custome.status')->middleware(['permission']);
     Route::delete('/delete-custom-timing', 'destroyCustomeOpening')->name('vendor.custom-timing.destroy')->middleware(['permission']);
   });
-  
+
   Route::controller(AllergenController::class)->prefix('vendor')->group(function () {
     Route::get('/all-allergen', 'index')->name('vendor.all.allergen');
     Route::post('/add-allergen', 'saveAllergen')->name('vendor.add.allergen')->middleware(['permission']);
     Route::put('/allergen-status/{id?}', 'updateAllergenStatus')->name('vendor.update.allergen.status')->middleware(['permission']);
     Route::post('/update-allergen', 'updateAllergen')->name('vendor.update.allergen')->middleware(['permission']);
     Route::delete('/delete-allergen', 'destroyAllergen')->name('vendor.allergen.destroy')->middleware(['permission']);
-    
-    
+
+
     Route::get('/all-taxes', 'allTax')->name('vendor.all.tax');
     Route::get('/edit-tax/{tax_id}', 'editTax')->name('vendor.edit.tax');
     Route::post('/save-tax', 'saveTax')->name('vendor.save.tax');
@@ -332,7 +333,7 @@ Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableSta
   });
 
   // only if you have permission  
-  
+
 
   Route::controller(VariantExtraPriceController::class)->prefix('vendor')->group(function () {
     Route::get('/all-variant-price-extras/{extra_id?}', 'index')->name('vendor.all.variant-price-extras');
@@ -340,7 +341,7 @@ Route::post('/table-booking-status', 'tableStatusChange')->name('vendor.tableSta
     Route::delete('/delete-variant-price-extra/{id?}', 'destroy')->name('vendor.delete.variant-price-extra')->middleware(['permission']);
   });
 
- 
+
   Route::controller(FoodSubItemController::class)->prefix('vendor')->group(function () {
     Route::get('/all-includes/{id?}', 'index')->name('vendor.all.include');
     Route::post('/add-include', 'saveInclude')->name('vendor.add.include')->middleware(['permission']);
@@ -400,8 +401,8 @@ Route::controller(HomePageController::class)->group(function () {
 Route::controller(customerAuthController::class)->group(function () {
   Route::get('/login', 'login')->name('login');
   Route::get('/register', 'register')->name('register');
-  Route::post('/register', 'register_save')->name('register_save');
-  Route::post('/login', 'login_verify')->name('login_verify');
+  Route::post('/register', 'register_save')->name('register_save')->middleware('throttle:5,1');
+  Route::post('/login', 'login_verify')->name('login_verify')->middleware('throttle:5,1');
   Route::get('/logout', 'logout')->name('logout');
   Route::get('/forget-password', 'forgetpassword')->name('forgetpassword');
   Route::post('/forget-password', 'sendotp')->name('sendotp');
@@ -432,6 +433,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/order/payment', 'payWithPayPal')->name('paypal.payment');
     Route::delete('/old-address/{address_id}', 'deleteOldAddress')->name('old.address.delete');
     Route::get('/payment-status', 'payPalStatus')->name('paypal.status');
+  });
+  Route::controller(StripeController::class)->group(function () {
+    Route::get('/stripe/success', 'stripeSuccess')->name('stripe.success');
+    Route::get('/stripe/cancel', 'stripeCancel')->name('stripe.cancel');
   });
   Route::controller(TableServiceController::class)->group(function () {
     Route::post('/pre-book', 'preBookTable')->name('preBookTable');

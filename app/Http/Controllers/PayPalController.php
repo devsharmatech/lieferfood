@@ -30,39 +30,40 @@ class PayPalController extends Controller
 
     public function __construct()
     {
-        $this->fcm = new FirebaseService(env('FIREBASE_PROJECT_ID'),public_path(env('FIREBASE_CREDENTIALS_PATH')));
+        $this->fcm = new FirebaseService(env('FIREBASE_PROJECT_ID'), public_path(env('FIREBASE_CREDENTIALS_PATH')));
     }
-    
+
     private function sendOrderNotification($receiverId, $title, $message, $type = 'order')
-{
-    $receiver = User::find($receiverId);
-    if (!$receiver) return;
+    {
+        $receiver = User::find($receiverId);
+        if (!$receiver)
+            return;
 
-    // Save in DB
-    Notification::create([
-        'user_id' => $receiver->id,
-        'type'    => $type,
-        'title'   => $title,
-        'message' => $message,
-        'is_read' => false,
-    ]);
+        // Save in DB
+        Notification::create([
+            'user_id' => $receiver->id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
 
-    // Send FCM if token exists
-    if ($receiver->device_token) {
-        try {
-            $this->fcm->sendNotification(
-                [$receiver->device_token],
-                [
-                    'title' => $title,
-                    'body'  => $message,
-                    'type'  => $type,
-                ]
-            );
-        } catch (\Exception $e) {
-            \Log::error('FCM Error: ' . $e->getMessage());
+        // Send FCM if token exists
+        if ($receiver->device_token) {
+            try {
+                $this->fcm->sendNotification(
+                    [$receiver->device_token],
+                    [
+                        'title' => $title,
+                        'body' => $message,
+                        'type' => $type,
+                    ]
+                );
+            } catch (\Exception $e) {
+                \Log::error('FCM Error: ' . $e->getMessage());
+            }
         }
     }
-}
 
     //
     public function payWithPayPal(Request $request)
@@ -290,7 +291,7 @@ class PayPalController extends Controller
                 $foodItem = $cart->food_item;
                 $variant = $cart->variant;
                 // dd($foodItem);
-                 
+
                 $variant_id = $variant->variant_id ?? null;
 
                 if ($foodItem) {
@@ -300,18 +301,18 @@ class PayPalController extends Controller
                     $extraIds = is_array(json_decode($cart->extras, true)) ? json_decode($cart->extras, true) : [];
 
                     if (!empty($extraIds) && is_array($extraIds)) {
-    $extraIds = array_map('intval', $extraIds); // Ensure integer IDs
+                        $extraIds = array_map('intval', $extraIds); // Ensure integer IDs
 
-    $cart->collection_items = CollectionItem::where('status', 1)
-        ->whereIn('id', $extraIds)
-        ->with('sub_items')
-        ->orderByRaw("FIELD(id, " . implode(',', $extraIds) . ")")
-        ->get();
+                        $cart->collection_items = CollectionItem::where('status', 1)
+                            ->whereIn('id', $extraIds)
+                            ->with('sub_items')
+                            ->orderByRaw("FIELD(id, " . implode(',', $extraIds) . ")")
+                            ->get();
                     } else {
-                      $cart->collection_items = collect(); // or handle error
+                        $cart->collection_items = collect(); // or handle error
                     }
 
-                        
+
                     $collectionData = [];
                     if (isset($cart->collection_items)) {
                         foreach ($cart->collection_items as $collectionItem) {
@@ -330,11 +331,11 @@ class PayPalController extends Controller
                     $newOrder->food_id = $foodItem->id;
                     $newOrder->food_item_name = $foodItem->food_item_name;
                     $newOrder->variant = isset($variant->variant_item->name) ? $variant->variant_item->name : "";
-                    if($cart->dressing!="" && empty($cart->variant_id)){
-                      $newOrder->price = isset($foodItem->delivery_price) ? (floatval($foodItem->delivery_price)) : 0; 
-                    //   dd($foodItem->price);
-                    }else{
-                      $newOrder->price = isset($variant->price) ? $variant->price : 0;  
+                    if ($cart->dressing != "" && empty($cart->variant_id)) {
+                        $newOrder->price = isset($foodItem->delivery_price) ? (floatval($foodItem->delivery_price)) : 0;
+                        //   dd($foodItem->price);
+                    } else {
+                        $newOrder->price = isset($variant->price) ? $variant->price : 0;
                     }
                     // dd($newOrder);
                     $newOrder->total_price = floatval($totalCostFood);
@@ -388,24 +389,57 @@ class PayPalController extends Controller
                 } else {
                     return redirect()->route('checkout.now')->with('error', $response['message'] ?? 'Something went wrong.');
                 }
+            } elseif ($request->paymentMethod == "stripe") {
+                // Stripe Checkout Session
+                try {
+                    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                    $amountInCents = intval(round($amount * 100));
+
+                    $session = \Stripe\Checkout\Session::create([
+                        'payment_method_types' => ['card'],
+                        'line_items' => [
+                            [
+                                'price_data' => [
+                                    'currency' => 'eur',
+                                    'product_data' => [
+                                        'name' => 'Lieferfood Order #' . $order_code,
+                                        'description' => 'Food order from Lieferfood',
+                                    ],
+                                    'unit_amount' => $amountInCents,
+                                ],
+                                'quantity' => 1,
+                            ]
+                        ],
+                        'mode' => 'payment',
+                        'success_url' => route('stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                        'cancel_url' => route('stripe.cancel'),
+                        'customer_email' => $request->email,
+                    ]);
+
+                    return redirect()->away($session->url);
+                } catch (\Exception $e) {
+                    \Log::error('Stripe Error: ' . $e->getMessage());
+                    return redirect()->route('checkout.now')->with(['alert-type' => 'error', 'message' => 'Stripe error: ' . $e->getMessage()]);
+                }
             } else {
                 $order->payment_method = $request->paymentMethod;
                 $order->payment_status = 2;
                 $order->save();
                 // Send Notification to customer
                 $this->sendOrderNotification(
-    $order->user_id,
-    'Order Placed Successfully 🎉',
-    "Your order #{$order_code} has been placed successfully.",
-    'order_success'
-);
+                    $order->user_id,
+                    'Order Placed Successfully 🎉',
+                    "Your order #{$order_code} has been placed successfully.",
+                    'order_success'
+                );
                 // send Notification to vendor
                 $this->sendOrderNotification(
-    $order->vendor_id,
-    'New Order Received 🛒',
-    "You have received a new order #{$order->order_code}.",
-    'new_order'
-);
+                    $order->vendor_id,
+                    'New Order Received 🛒',
+                    "You have received a new order #{$order->order_code}.",
+                    'new_order'
+                );
 
                 $user = User::where('id', $order->user_id)->first();
                 $orderItems = Order_item::where('order_id', $order->id)->get();
@@ -452,28 +486,28 @@ class PayPalController extends Controller
             $order->payment_method = 'paypal';
             $order->payment_status = 2;
             $order->save();
-           
+
             // -----------------------------
 // SEND ORDER NOTIFICATIONS
 // -----------------------------
 
-// Notify USER
-$this->sendOrderNotification(
-    $order->user_id,
-    'Order Placed Successfully 🎉',
-    "Your PayPal payment was successful. Order #{$order->order_code} has been placed.",
-    'order_success'
-);
+            // Notify USER
+            $this->sendOrderNotification(
+                $order->user_id,
+                'Order Placed Successfully 🎉',
+                "Your PayPal payment was successful. Order #{$order->order_code} has been placed.",
+                'order_success'
+            );
 
-// Notify VENDOR
-$this->sendOrderNotification(
-    $order->vendor_id,
-    'New Order Received 🛒',
-    "You have received a new paid order #{$order->order_code}.",
-    'new_order'
-);
+            // Notify VENDOR
+            $this->sendOrderNotification(
+                $order->vendor_id,
+                'New Order Received 🛒',
+                "You have received a new paid order #{$order->order_code}.",
+                'new_order'
+            );
 
-           
+
             $paymentOrder = new Payment();
             $paymentOrder->user_id = Auth::user()->id;
             $paymentOrder->vendor_id = $order->vendor_id;
