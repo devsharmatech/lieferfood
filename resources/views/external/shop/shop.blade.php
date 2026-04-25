@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <!-- Display Categories -->
                             @foreach ([
             'Open For Delivery and Pickup Service' => $bothServicesOpen,
-            'Open For Only Delivery Service' => $deliveryOnly,
+            'Open For Delivery Service Only' => $deliveryOnly,
             'Open For Only Pickup Service' => $pickupOnly,
             'Pre-Order for Delivery and Pickup Service' => $deliveryPickupFutureOpen,
             'Pre-Order for Delivery' => $deliveryFutureOpen,
@@ -675,10 +675,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="card overflow-hidden mt-3 border-0 shadow-0"
                                             style="{{ $dim }}">
                                             <div class="row">
-                                                <a @if ($avtime != '') data-url="{{ route('shop.view', $open_vendor->unid) }}" data-pickup="{{ $pickupTime ?? '' }}" data-open="{{ $avtime ?? '' }}"  href="javaScript::void(0)" class=" position-relative pe-md-0 pe-auto vendor-link"
-                                                  @else
-                                                   href="{{ route('shop.view', $open_vendor->unid) }}" class="col-12 position-relative" @endif
-                                                    style="height: 12rem;">
+                                                <a 
+@if ($avtime != '' || $heading == 'Open For Delivery Service Only' || $heading == 'Open For Only Pickup Service' || $heading == 'Closed Shops') 
+    data-url="{{ route('shop.view', $open_vendor->unid) }}"
+    data-off="{{ $heading ?? '' }}"
+    data-pickup="{{ $pickupTime ?? '' }}"
+    data-open="{{ $avtime ?? '' }}"
+    href="javascript:void(0)"
+    class="position-relative pe-md-0 pe-auto vendor-link"
+@else
+    href="{{ route('shop.view', $open_vendor->unid) }}"
+    class="col-12 position-relative"
+@endif
+style="height: 12rem;">
                                                     <div class="img-view position-relative h-100">
                                                         <img src="{{ asset('uploads/users/' . $open_vendor->profile) }}"
                                                             class="h-100 w-100 rounded-2" alt="" style="border-bottom-left-radius:0px !important; border-bottom-right-radius:0px !important;">
@@ -690,18 +699,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                                             <span style="cursor:pointer;"
                                                                 class="pmt px-2 py-1 fw-bolder text-white me-2">Open From:
                                                                 {{ $avtime ?? '' }} </span>
-                                                        @elseif($heading == 'Open For Only Delivery Service')
+                                                        @elseif($heading == 'Open For Delivery Service Only')
                                                             <span style="cursor:pointer;"
-                                                                class="pmt px-2 py-1 fw-bolder text-white me-2">Delivery
-                                                                Only</span>
+                                                                class="pmt px-2 py-1 fw-bolder text-white me-2">Only Delivery
+                                                                </span>
                                                         @elseif($heading == 'Open For Only Pickup Service')
                                                             <span style="cursor:pointer;"
                                                                 class="pmt px-2 py-1 fw-bolder text-white me-2">Pickup
                                                                 Only</span>
                                                         @elseif($heading == 'Closed Shops')
                                                             <span style="cursor:pointer;"
-                                                                class="pmt px-2 py-1 fw-bolder text-white me-2">Closed
-                                                                Shop</span>
+                                                                class="pmt px-2 py-1 fw-bolder text-white me-2">Currently ordering is <br> not available</span>
                                                         @endif
                                                         @if (!empty($open_vendor->vendor_details->isSponsored) && $open_vendor->vendor_details->isSponsored == 1)
                                                             <div class="ft-ic"
@@ -1070,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal-body position-relative">
                     <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal"
                         aria-label="Close" style="top:4%;right:4%;font-size:13px;"></button>
-                    <p class="fs-3 fw-bolder mt-3 pb-0 mb-0 text-center"><strong>Restaurant open at </strong> <span
+                    <p class="fs-3 fw-bolder mt-3 pb-0 mb-0 text-center"><strong id="modalHeading">Restaurant open at </strong> <span
                             id="modalTime"></span></p>
                     <p class="text-center pb-0 mb-2 fs-1" id="opencontent"></p>
                     <div class="d-flex justify-content-center align-items-center flex-column ">
@@ -1085,33 +1093,71 @@ document.addEventListener('DOMContentLoaded', function() {
 @endsection
 @section('external-js')
     
-    <script>
-        $(document).ready(function() {
-            // Handle click event on vendor link
-            $('.vendor-link').on('click', function(e) {
-                e.preventDefault();
+   <script>
+$(document).ready(function() {
 
-                // Get data from the clicked element
-                const openTime = $(this).data('open') || 'Unavailable';
-                const openPickup = $(this).data('pickup') || '';
-                const preOrderUrl = $(this).data('url');
+    // ✅ Use delegated event (works for dynamic content too)
+    $(document).on('click', '.vendor-link', function(e) {
 
-                // Update modal content
-                $('#modalTime').text(openTime);
-                if (openPickup != "") {
-                    $('#opencontent').text(
-                        `You can shedule delivery from ${openTime} or shedule pickup from ${openPickup}.`
-                        );
-                } else {
-                    $('#opencontent').text(`You can shedule your order for later.`);
-                }
+        e.preventDefault();
+
+        const openTime   = $(this).attr('data-open') || '';
+        const openPickup = $(this).attr('data-pickup') || '';
+        const isoff      = $(this).attr('data-off') || '';
+        const preOrderUrl= $(this).attr('data-url') || '';
+
+        // 🧠 Better condition handling
+        if (openTime !== '') {
+
+            $('#modalTime').text(openTime);
+
+            if (openPickup !== '') {
+                $('#opencontent').text(
+                    `You can schedule delivery from ${openTime} or schedule pickup from ${openPickup}.`
+                );
+            } else {
+                $('#opencontent').text(`You can schedule your order for later.`);
+            }
+
+            $('#preOrderBtn').attr('href', preOrderUrl);
+            $('#modalHeading').text('Shop Open at ');
+
+        } else {
+
+            if (isoff == "Closed Shops") {
+                $('#opencontent').text(
+                    `Currently ordering is not available. Please check back later or explore other nearby options.`
+                );
                 $('#preOrderBtn').attr('href', preOrderUrl);
+                // want to see menu like this i want button name
+                $('#preOrderBtn').text('See Menu');
 
-                // Show the modal
-                $('#vendorModal').modal('show');
-            });
-        });
-    </script>
+                
+
+            } else if (isoff === "Open For Delivery Service Only") {
+                $('#opencontent').text(`This shop is available for delivery only.`);
+                $('#modalHeading').text('Shop open for delivery only');
+                $('#preOrderBtn').attr('href', preOrderUrl);
+                 $('#preOrderBtn').text('Order for delivery');
+            } else if (isoff === "Open For Only Pickup Service") {
+                $('#opencontent').text(`This shop is available for pickup only.`);
+                $('#modalHeading').text('Shop open for pickup only');
+                $('#preOrderBtn').attr('href', preOrderUrl);
+                $('#preOrderBtn').text('Order for pickup');
+            } else {
+                $('#opencontent').text(`Currently unavailable.`);
+                    $('#modalHeading').text('Shop unavailable');
+                    $('#preOrderBtn').attr('href', preOrderUrl);
+            }
+        }
+
+        // ✅ Show modal
+        $('#vendorModal').modal('show');
+
+    });
+
+});
+</script>
     <script>
         $(document).ready(function() {
             $('.category_items').owlCarousel({

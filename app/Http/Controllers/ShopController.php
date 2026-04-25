@@ -96,21 +96,21 @@ if ($request->has('categories')) {
         $query->where('name', 'like', '%' . $request->search . '%');
     }
 
-    if ($request->has('restaurant_status') && $request->input('restaurant_status') !== '') {
-        $query->whereHas('vendor_details', function ($query) use ($request) {
-            $query->where('restaurant_status', $request->input('restaurant_status'));
-        });
-    } else {
-        $query->whereHas('vendor_details', function ($query) {
-            $query->where('restaurant_status', 1);
-        });
-    }
+    // if ($request->has('restaurant_status') && $request->input('restaurant_status') !== '') {
+    //     $query->whereHas('vendor_details', function ($query) use ($request) {
+    //         $query->where('restaurant_status', $request->input('restaurant_status'));
+    //     });
+    // } else {
+    //     $query->whereHas('vendor_details', function ($query) {
+    //         $query->where('restaurant_status', 1);
+    //     });
+    // }
 
-    if ($request->has('isDelivery') && $request->input('isDelivery') !== '') {
-        $query->whereHas('vendor_details', function ($query) use ($request) {
-            $query->where('isDelivery', $request->input('isDelivery'));
-        });
-    }
+    // if ($request->has('isDelivery') && $request->input('isDelivery') !== '') {
+    //     $query->whereHas('vendor_details', function ($query) use ($request) {
+    //         $query->where('isDelivery', $request->input('isDelivery'));
+    //     });
+    // }
 
     if ($request->input('show') === 'low') {
         $query->whereHas('vendor_details', function ($query) {

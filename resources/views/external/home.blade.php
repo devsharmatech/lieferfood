@@ -432,7 +432,7 @@
 </style>
 @endsection
 @section('external-home-content')
-    <section id="home" class="home-section mt-0 py-md-5 py-3 position-relative">
+    <section id="home" class="home-section mt-0 py-md-4 py-3 position-relative">
     <!-- Video container with overlay solution -->
     <div class="video-container position-absolute w-100 h-100">
         <video autoplay muted loop playsinline class="home-video w-100 h-100">
@@ -445,7 +445,7 @@
     
     <!-- Content overlay -->
     <div class="home-overlay"></div>
-    <div class="home-content py-5  pt-2  pb-4 position-relative">
+    <div class="home-content py-0 position-relative">
         <h1 class="home-message text-center text-light mb-0">Discover Delicious Meals Nearby</h1>
         <p class="home-submessage text-center mb-1">Search and order from the best restaurants in your area.</p>
         <form class="home-search-form position-relative mt-2 flex-column d-flex justify-content-center align-items-center" action="{{ route('shop') }}">
@@ -534,12 +534,60 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
     </div>
 </section>
-
-    <section id="testimonial" class="pt-4 pb-0">
+   <!-- Top Rated Restaurants Section -->
+    <section class="py-2 pb-2 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row h-100">
+                <div class="col-lg-7 mx-auto text-center mb-2">
+                    <h5 class="fw-bold py-0 my-0 fs-3 fs-lg-4 lh-sm d-flex align-items-center justify-content-center">
+                        <a href="javaScript:void(0)" class="text-primary me-3 d-flex align-items-center justify-content-center" id="top_rated_left"> 
+                            <i class="fa-solid fa-chevron-left fs-4" aria-hidden="true"></i> 
+                        </a>
+                        Top Rated Customers Picks 
+                        <a href="javaScript:void(0)" class="text-primary d-flex align-items-center justify-content-center" style="margin-left:15px;" id="top_rated_right"> 
+                            <i class="fa-solid fa-chevron-right fs-4" aria-hidden="true"></i> 
+                        </a>
+                    </h5>
+                    <p class="text-dark py-0 my-0">The highest reviewed restaurants in your area.</p>
+                </div>
+                <div class="col-12">
+                    <div class="owl-carousel top_rated_items">
+                       
+                        @foreach ($vendors->take(8) as $item)
+                            <a href="{{ route('shop.view', $item->unid) }}" class="card top-rated-card h-100 rounded-4 text-decoration-none">
+                                <div class="position-relative">
+                                    <div class="rating-badge">
+                                        
+                                        <i class="fas fa-star"></i> {{ number_format(rand(45, 50) / 10, 1) }}
+                                    </div>
+                                    @if (Str::startsWith($item->image, 'http'))
+                                        <img src="{{ $item->profile }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 9rem !important; object-fit: cover; border-radius: 0.5rem;">
+                                    @else
+                                        <img src="{{ asset('uploads/users/' . $item->profile) }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 9rem !important; object-fit: cover; border-radius: 0.5rem; ">
+                                    @endif
+                                </div>
+                                <div class="card-body text-center bg-white">
+                                    <h5 class="fw-bold text-dark text-truncate mb-2 fs-1">{{ $item->name }}</h5>
+                                    @if(isset($item->vendor_details->category))
+                                        <p class="text-muted small mb-2">{{ $item->vendor_details->category }}</p>
+                                    @endif
+                                    <div style="font-size:13px;" class="d-flex justify-content-center align-items-center gap-3">
+                                        <span class="badge bg-light text-dark border"><i class="fas fa-motorcycle text-primary me-1"></i> 30-40 min</span>
+                                        <span class="text-success fw-bold">Min &euro;{{ isset($item->vendor_details->minimum_price) ? $item->vendor_details->minimum_price : '20' }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="testimonial" class="pt-1 pb-0">
         <div class="container-fluid">
             <div class="row h-100">
                 <div class="col-lg-7 mx-auto text-center ">
-                    <h5 class="fw-bold fs-3 fs-lg-5 lh-sm mb-3 d-flex align-items-center justify-content-center">
+                    <h5 class="fw-bold fs-3 fs-lg-4 lh-sm mb-3 d-flex align-items-center justify-content-center">
                                <a href="javaScript:void(0)" class="text-primary me-3 d-flex align-items-center justify-content-center" id="featured_left"> <i
                                 class="fa-solid fa-chevron-left fs-4" aria-hidden="true"></i> </a> 
                                 Featured Restaurants
@@ -577,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="container-fluid">
             <div class="row h-100">
                 <div class="col-lg-7 mx-auto text-center ">
-                    <h5 class="fw-bold fs-3 fs-lg-5 lh-sm d-flex align-items-center justify-content-center">
+                    <h5 class="fw-bold fs-3 fs-lg-4 lh-sm d-flex align-items-center justify-content-center">
                         <a href="javaScript:void(0)" class="text-primary me-3 d-flex align-items-center justify-content-center" id="popular_left"> <i
                                 class="fa-solid fa-chevron-left fs-4" aria-hidden="true"></i> </a>
                         Popular Restaurants
@@ -848,58 +896,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </section>
 
-    <!-- Top Rated Restaurants Section -->
-    <section class="py-5 overflow-hidden">
-        <div class="container-fluid">
-            <div class="row h-100">
-                <div class="col-lg-7 mx-auto text-center mb-4">
-                    <h5 class="fw-bold fs-3 fs-lg-5 lh-sm d-flex align-items-center justify-content-center">
-                        <a href="javaScript:void(0)" class="text-primary me-3 d-flex align-items-center justify-content-center" id="top_rated_left"> 
-                            <i class="fa-solid fa-chevron-left fs-4" aria-hidden="true"></i> 
-                        </a>
-                        Top Rated Customers Picks <i class="fas fa-star text-warning ms-3"></i>
-                        <a href="javaScript:void(0)" class="text-primary d-flex align-items-center justify-content-center" style="margin-left:15px;" id="top_rated_right"> 
-                            <i class="fa-solid fa-chevron-right fs-4" aria-hidden="true"></i> 
-                        </a>
-                    </h5>
-                    <p class="text-muted">The highest reviewed restaurants in your area.</p>
-                </div>
-                <div class="col-12">
-                    <div class="owl-carousel top_rated_items">
-                        {{-- 
-                            For now, we will reuse the $vendors array, but in a real-world scenario, 
-                            this should be sorted by average rating from the controller ($topRatedVendors). 
-                        --}}
-                        @foreach ($vendors->take(8) as $item)
-                            <a href="{{ route('shop.view', $item->unid) }}" class="card top-rated-card h-100 rounded-4 text-decoration-none">
-                                <div class="position-relative">
-                                    <div class="rating-badge">
-                                        {{-- Mocking a high rating for visual presentation --}}
-                                        <i class="fas fa-star"></i> {{ number_format(rand(45, 50) / 10, 1) }}
-                                    </div>
-                                    @if (Str::startsWith($item->image, 'http'))
-                                        <img src="{{ $item->profile }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 200px !important; object-fit: cover; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                                    @else
-                                        <img src="{{ asset('uploads/users/' . $item->profile) }}" class="card-img-top h-100" alt="{{ $item->name }}" style="height: 200px !important; object-fit: cover; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                                    @endif
-                                </div>
-                                <div class="card-body text-center bg-white">
-                                    <h5 class="fw-bold text-dark text-truncate mb-2 fs-2">{{ $item->name }}</h5>
-                                    @if(isset($item->vendor_details->category))
-                                        <p class="text-muted small mb-2">{{ $item->vendor_details->category }}</p>
-                                    @endif
-                                    <div class="d-flex justify-content-center align-items-center gap-3">
-                                        <span class="badge bg-light text-dark border"><i class="fas fa-motorcycle text-primary me-1"></i> 30-40 min</span>
-                                        <span class="text-success fw-bold fs-0">Min &euro;{{ isset($item->vendor_details->minimum_price) ? $item->vendor_details->minimum_price : '20' }}</span>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    
     <section class="py-0" id="steps">
         <div class="bg-holder"  style="background-image:url({{ asset('uploads/ft-banner2.jpg') }});background-position:center;background-size:fill;">
         </div>
@@ -1026,9 +1023,9 @@ document.addEventListener('DOMContentLoaded', function() {
             autoplayTimeout: 3000,
             responsiveClass: true,
             responsive: {
-                0: { items: 1.2, nav: false },
-                600: { items: 3, nav: false },
-                1000: { items: 4, nav: false, loop: true }
+                0: { items: 1.5, nav: false },
+                600: { items: 4, nav: false },
+                1000: { items: 6, nav: false, loop: true }
             }
         });
         var top_rated_items = $(".top_rated_items");

@@ -1,4 +1,7 @@
+
 <?php
+
+
 ob_clean();
 header_remove();
 error_reporting(0);
@@ -33,7 +36,7 @@ class OrderService {
 
    private function getOrders($vendorId) {
     $stmt = $this->pdo->prepare("SELECT * FROM orders 
-     WHERE order_status = 'pending' AND payment_status != 0 AND vendor_id = :vendor_id AND DATE(created_at) = CURDATE() ORDER BY created_at DESC");
+     WHERE order_status = 'pending' AND payment_status != 0 AND vendor_id = :vendor_id AND created_at = CURDATE() ORDER BY created_at DESC");
      $stmt->execute([':vendor_id' => $vendorId]);
      return $stmt->fetchAll();
      }
@@ -83,6 +86,7 @@ class OrderService {
         return [
             "LastName" => $food_receiver['last_name'] ?? null,
             "AddAddress" => $deliveryAddress['additional_address'] ?? null,
+            "Floor" => $deliveryAddress['floor'] ?? null,
             "Company" => $deliveryAddress['company_name'] ?? null,
             "Zip" => $deliveryAddress['postal_code'] ?? null,
             "Street" => $deliveryAddress['street'] ?? null,
@@ -233,7 +237,7 @@ return json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 // Usage example
 try {
-    $orderService = new OrderService('localhost', 'u511436824_lieferfood', 'u511436824_lieferfood', 'Lieferfood@123!@');
+    $orderService = new OrderService('localhost', 'lieferfood', 'lieferfood', 'lieferfood@2026');
     $requestMethod = $_SERVER['REQUEST_METHOD'];
     
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
@@ -254,3 +258,4 @@ try {
 } catch (Exception $e) {
     return json_encode(["OrderList" => ["Order" => [], "CreateDateTime" => date(DATE_RFC3339)]], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }
+

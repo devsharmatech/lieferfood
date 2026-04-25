@@ -487,7 +487,7 @@ function formatId($id) {
                                                     <option value="confirmed" {{ $order->order_status == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
                                                     <option value="out_for_delivery" {{ $order->order_status == 'out_for_delivery' ? 'selected' : '' }}>Out for delivery</option>
                                                     <option value="delivered" {{ $order->order_status == 'delivered' ? 'selected' : '' }}>Delivered</option>
-                                                    <option value="cancelled" {{ $order->order_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                    <option disabled value="cancelled" {{ $order->order_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                                 </select>
                                             </div>
                                             
@@ -496,7 +496,7 @@ function formatId($id) {
                                                 <a href="{{ route('vendor.order.view', $order->id) }}"
                                                    class="btn btn-sm btn-outline-primary flex-fill py-1"
                                                    title="View Full Details">
-                                                    <i class="fas fa-eye me-1"></i> View
+                                                    <i class="fas fa-eye me-1"></i> View Order Detail
                                                 </a>
                                                 <a href="{{ route('vendor.generate.order.pdf', $order->id) }}"
                                                    class="btn btn-sm btn-outline-dark py-1 px-2"

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class AdminAuthController extends Controller
 {
@@ -111,18 +112,88 @@ class AdminAuthController extends Controller
             $quote = "The best way to predict your future is to create it.";
             $author = "Abraham Lincoln";
         }
-        $today = now()->toDateString();
+          
+ /* ---------------- Date Helpers ---------------- */
+        $today = Carbon::today();
+        $weekStart = Carbon::now()->startOfWeek();
+        $monthStart = Carbon::now()->startOfMonth();
+
+        /* ---------------- Orders Stats ---------------- */
         $todayOrders = Order::whereDate('created_at', $today)
             ->count();
+
         $todayPendingOrders = Order::where('order_status', 'pending')
             ->whereDate('created_at', $today)
             ->count();
+
         $todayCancelledOrders = Order::where('order_status', 'cancelled')
             ->whereDate('created_at', $today)
             ->count();
+
+        $totalOrders = Order::count();
+
+        $weeklyOrders = Order::where('created_at', '>=', $weekStart)
+            ->count();
+
+        $monthlyOrders = Order::where('created_at', '>=', $monthStart)
+            ->count();
+
+        $deliveredOrders = Order::where('order_status', 'delivered')
+            ->count();
+        $deliveryOrders = Order::where('method_type', 'delivery')
+            ->count();
+        $pickupOrders = Order::where('method_type', 'pickup')
+            ->count();
+        $totalOrders = Order::count();
+
+        /* ---------------- Revenue Stats ---------------- */
         $todayRevenue = Order::where('order_status', 'delivered')
             ->whereDate('created_at', $today)
             ->sum('total_amount');
-       return view('admin.welcome',compact('quote', 'author','todayOrders','todayPendingOrders','todayCancelledOrders','todayRevenue'));     
+
+        $weeklyRevenue = Order::where('order_status', 'delivered')
+            ->where('created_at', '>=', $weekStart)
+            ->sum('total_amount');
+
+        $monthlyRevenue = Order::where('order_status', 'delivered')
+            ->where('created_at', '>=', $monthStart)
+            ->sum('total_amount');
+
+        $totalRevenue = Order::where('order_status', 'delivered')
+            ->sum('total_amount');
+
+        $avgOrderValue = Order::where('order_status', 'delivered')
+            ->avg('total_amount');
+
+        /* ---------------- Customer Stats ---------------- */
+        $totalCustomers = Order::distinct('user_id')
+            ->count('user_id');
+
+        $todayCustomers = Order::whereDate('created_at', $today)
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return view('admin.welcome', compact(
+            'quote',
+            'author',
+         
+            'todayOrders',
+            'todayPendingOrders',
+            'todayCancelledOrders',
+            'todayRevenue',
+            'weeklyOrders',
+            'monthlyOrders',
+            'totalOrders',
+            'deliveredOrders',
+            'weeklyRevenue',
+            'monthlyRevenue',
+            'totalRevenue',
+            'avgOrderValue',
+            'totalCustomers',
+            'todayCustomers',
+            'totalOrders',
+            'deliveryOrders',
+            'pickupOrders'
+        ));
     }
 }

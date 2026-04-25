@@ -1,21 +1,45 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Order;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class allOrderController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
         if (isset(Auth::user()->id)) {
-            $orders = Order::with('order_items', 'vendor', 'user')->latest()->get();
-            // dd($orders);
+            $query = Order::with('vendor','order_items.food');
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [
+                $request->start_date,
+                $request->end_date
+            ]);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('order_status', $request->status);
+        }
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        if ($request->filled('method_type')) {
+            $query->where('method_type', $request->method_type);
+        }
+
+        // 🔥 Pagination (10 orders per page)
+        $orders = $query->latest()->paginate(9);
+
+        // Keep filters while paginating
+        $orders->appends($request->all());
+
             return view('admin.order.all-orders', compact('orders'));
         } else {
             return back()->with(['alert-type' => 'error', 'message' => 'Please login first.']);

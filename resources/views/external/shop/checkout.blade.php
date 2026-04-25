@@ -115,13 +115,9 @@
             flex-wrap: wrap;
         }
 
-
-
         .payment-card input[type="radio"] {
             display: none;
         }
-
-
 
         .payment-card img {
             width: 50px;
@@ -194,7 +190,94 @@
             font-size: 18px;
             width: calc(100% - 30px);
         }
+
+        /* ========== STICKY/SCROLLABLE LAYOUT STYLES ========== */
+        @media (min-width: 1200px) {
+            .checkout-wrapper {
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+                gap: 0;
+            }
+
+            .scrollable-column {
+                flex: 0 0 66.666667%;
+                max-width: 66.666667%;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 25px;
+                scrollbar-width: thin;
+                scrollbar-color: #c1c1c1 #f1f1f1;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .scrollable-column::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .scrollable-column::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+                margin: 10px 0;
+            }
+
+            .scrollable-column::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 10px;
+            }
+
+            .scrollable-column::-webkit-scrollbar-thumb:hover {
+                background: #a1a1a1;
+            }
+
+            .sticky-column {
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+                position: sticky;
+                top: 20px;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+                padding-left: 15px;
+            }
+
+            .sticky-column .card {
+                max-height: none;
+            }
+        }
+
+        /* Mobile: reset all sticky/fixed behavior */
+        @media (max-width: 1199.98px) {
+            .checkout-wrapper {
+                display: block;
+            }
+
+            .scrollable-column {
+                flex: none;
+                max-width: 100%;
+                max-height: none;
+                overflow-y: visible;
+                padding-right: 0;
+            }
+
+            .sticky-column {
+                flex: none;
+                max-width: 100%;
+                position: relative;
+                top: auto;
+                max-height: none;
+                overflow-y: visible;
+                padding-left: 0;
+                margin-top: 20px;
+            }
+        }
+
+        /* Smooth scrolling for the entire page */
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
+
     <style>
         .payment-methods {
             display: flex;
@@ -313,6 +396,7 @@
             line-height: 1.2;
         }
     </style>
+
     <style>
         .autocomplete-suggestions {
             position: absolute;
@@ -327,9 +411,7 @@
             -webkit-overflow-scrolling: touch;
             width: 100%;
             display: none;
-
             border-radius: 10px;
-
         }
 
         .autocomplete-suggestions div {
@@ -376,7 +458,6 @@
         }
 
         .pac-item {
-
             border: none !important;
             border-bottom: 1px solid #ddd !important;
             line-height: normal !important;
@@ -400,12 +481,10 @@
             outline: none;
             cursor: pointer;
             transition: all 0.3s ease;
-
             /* Remove default arrow */
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-
             /* Custom arrow */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='gray' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
@@ -429,7 +508,14 @@
             color: #aaa;
         }
     </style>
+
+    <style>
+        .extra-item {
+            display: none;
+        }
+    </style>
 @endsection
+
 @section('external-home-content')
     <section class="py-0 ">
         @php
@@ -442,7 +528,7 @@
             );
         @endphp
         <div class="container-fluid py-5 pt-3">
-            <form method="post" action="{{ route('paypal.payment') }}" class="row">
+            <form method="post" action="{{ route('paypal.payment') }}">
                 @csrf
                 @php
                     $totalAmount = 0;
@@ -488,551 +574,531 @@
 
                 @endphp
                 <h1 class="text-center fw-bold fs-4  mb-2 text-uppercase">Go To Checkout</h1>
-                <div class="col-xl-8 px-md-3 px-0 lableform">
-                    <div class="card  border-0">
-                        <div class="card-body pt-0">
-                            <div class="row">
-                                <div class="col-12">
-                                    <h5 class="text-uppercase text-sm-start text-center fw-bold">
-                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                                        {{ $method == 'delivery' ? 'All' : 'Pickup' }} Address
-                                    </h5>
-                                </div>
-                                <hr>
-                                <input type="hidden" name="method_type"
-                                    value="{{ $method == 'delivery' ? 'delivery' : 'pickup' }}">
-                                @if ($method == 'delivery')
-                                    <div class="col-12">
-                                        <div class="accordion" id="accordionExample">
-                                            <div class="accordion-item ">
-                                                <h2 class="accordion-header" id="headingOne">
-                                                    <button class="accordion-button text-white fs-1 fw-bold"
-                                                        style="background:gray;" type="button" data-bs-toggle="collapse"
-                                                        data-bs-target="#collapseOne" aria-expanded="true"
-                                                        aria-controls="collapseOne">
-                                                        Choose Your Delivery Address From Saved Address
-                                                    </button>
-                                                </h2>
-                                                <div id="collapseOne" class="accordion-collapse collapse "
-                                                    aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                                                    <div class="accordion-body px-0">
-                                                        <div class="row">
-                                                            @if (isset($oldAddresses))
-                                                                @forelse ($oldAddresses as $oldAddress)
-
-                                                                    <div class="col-md-6 d-flex align-items-center">
-
-                                                                        <label class="address-card card position-relative w-100">
-                                                                            <input type="radio" name="old_address"
-                                                                                class="card-input old_address"
-                                                                                value="{{ $oldAddress->id }}"
-                                                                                data-street="{{ $oldAddress->street ?? '' }}"
-                                                                                data-house-number="{{ $oldAddress->house_no ?? '' }}"
-                                                                                data-postal-code="{{ $oldAddress->postal_code ?? '' }}"
-                                                                                data-city="{{ $oldAddress->city ?? '' }}"
-                                                                                data-floor="{{ $oldAddress->floor ?? '' }}"
-                                                                                data-latitude="{{ $oldAddress->latitude ?? '' }}"
-                                                                                data-longitude="{{ $oldAddress->longitude ?? '' }}"
-                                                                                data-company-name="{{ $oldAddress->company_name ?? '' }}">
-                                                                            <div class="card-body  p-2 w-100 ">
-
-                                                                                <p class="card-text fw-bold"
-                                                                                    style="word-break:break-all !important;">
-                                                                                    {{ isset($oldAddress->street) && $oldAddress->street != '' ? $oldAddress->street : '' }}
-                                                                                    {{ isset($oldAddress->house_no) && $oldAddress->house_no != '' ? $oldAddress->house_no : '' }}
-                                                                                    {{ isset($oldAddress->floor) && $oldAddress->floor != '' ? ', ' . $oldAddress->floor . ' Floor' : '' }}
-                                                                                    {{ isset($oldAddress->postal_code) && $oldAddress->postal_code != '' ? ', ' . $oldAddress->postal_code : '' }}
-                                                                                    {{ isset($oldAddress->city) && $oldAddress->city != '' ? $oldAddress->city : '' }}
-                                                                                    {{ isset($oldAddress->company_name) && $oldAddress->company_name != '' ? ', ' . $oldAddress->company_name : '' }}
-                                                                                </p>
-
+                
+                {{-- CHECKOUT WRAPPER with sticky/scrollable layout --}}
+                <div class="checkout-wrapper">
+                    
+                    {{-- LEFT SCROLLABLE COLUMN --}}
+                    <div class="scrollable-column">
+                        <div class="lableform">
+                            <div class="card  border-0">
+                                <div class="card-body pt-0">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h5 class="text-uppercase text-sm-start text-center fw-bold">
+                                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                                {{ $method == 'delivery' ? 'All' : 'Pickup' }} Address
+                                            </h5>
+                                        </div>
+                                        <hr>
+                                        <input type="hidden" name="method_type"
+                                            value="{{ $method == 'delivery' ? 'delivery' : 'pickup' }}">
+                                        @if ($method == 'delivery')
+                                            <div class="col-12">
+                                                <div class="accordion" id="accordionExample">
+                                                    <div class="accordion-item ">
+                                                        <h2 class="accordion-header" id="headingOne">
+                                                            <button class="accordion-button text-white fs-1 fw-bold"
+                                                                style="background:gray;" type="button" data-bs-toggle="collapse"
+                                                                data-bs-target="#collapseOne" aria-expanded="true"
+                                                                aria-controls="collapseOne">
+                                                                Choose Your Delivery Address From Saved Address
+                                                            </button>
+                                                        </h2>
+                                                        <div id="collapseOne" class="accordion-collapse collapse "
+                                                            aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                                            <div class="accordion-body px-0">
+                                                                <div class="row">
+                                                                    @if (isset($oldAddresses))
+                                                                        @forelse ($oldAddresses as $oldAddress)
+                                                                            <div class="col-md-6 d-flex align-items-center">
+                                                                                <label class="address-card card position-relative w-100">
+                                                                                    <input type="radio" name="old_address"
+                                                                                        class="card-input old_address"
+                                                                                        value="{{ $oldAddress->id }}"
+                                                                                        data-street="{{ $oldAddress->street ?? '' }}"
+                                                                                        data-house-number="{{ $oldAddress->house_no ?? '' }}"
+                                                                                        data-postal-code="{{ $oldAddress->postal_code ?? '' }}"
+                                                                                        data-city="{{ $oldAddress->city ?? '' }}"
+                                                                                        data-floor="{{ $oldAddress->floor ?? '' }}"
+                                                                                        data-latitude="{{ $oldAddress->latitude ?? '' }}"
+                                                                                        data-longitude="{{ $oldAddress->longitude ?? '' }}"
+                                                                                        data-company-name="{{ $oldAddress->company_name ?? '' }}">
+                                                                                    <div class="card-body  p-2 w-100 ">
+                                                                                        <p class="card-text fw-bold"
+                                                                                            style="word-break:break-all !important;">
+                                                                                            {{ isset($oldAddress->street) && $oldAddress->street != '' ? $oldAddress->street : '' }}
+                                                                                            {{ isset($oldAddress->house_no) && $oldAddress->house_no != '' ? $oldAddress->house_no : '' }}
+                                                                                            {{ isset($oldAddress->floor) && $oldAddress->floor != '' ? ', ' . $oldAddress->floor . ' Floor' : '' }}
+                                                                                            {{ isset($oldAddress->postal_code) && $oldAddress->postal_code != '' ? ', ' . $oldAddress->postal_code : '' }}
+                                                                                            {{ isset($oldAddress->city) && $oldAddress->city != '' ? $oldAddress->city : '' }}
+                                                                                            {{ isset($oldAddress->company_name) && $oldAddress->company_name != '' ? ', ' . $oldAddress->company_name : '' }}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </label>
+                                                                                <div class="text-start" style="margin-left:10px;">
+                                                                                    <i style="cursor:pointer;"
+                                                                                        class="fa-solid fa-trash text-danger text-start  delete-address"
+                                                                                        data-id="{{ $oldAddress->id }}"
+                                                                                        title="Delete Address"></i>
+                                                                                </div>
                                                                             </div>
-                                                                        </label>
-                                                                        <div class="text-start" style="margin-left:10px;">
-                                                                            <i style="cursor:pointer;"
-                                                                                class="fa-solid fa-trash text-danger text-start  delete-address"
-                                                                                data-id="{{ $oldAddress->id }}"
-                                                                                title="Delete Address"></i>
-                                                                        </div>
-
-                                                                    </div>
-                                                                @empty
-                                                                    <h5 class="fw-semibold text-center">Your Saved Address
-                                                                        not
-                                                                        found!</h5>
-                                                                @endforelse
-                                                            @endif
-
+                                                                        @empty
+                                                                            <h5 class="fw-semibold text-center">Your Saved Address
+                                                                                not found!</h5>
+                                                                        @endforelse
+                                                                    @endif
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                @php
+                                                    $userLat = session('latitude');
+                                                    $userLng = session('longitude');
+                                                @endphp
 
-                                        </div>
-                                        @php
-                                            $userLat = session('latitude');
-                                            $userLng = session('longitude');
-                                        @endphp
+                                                <div class="row mt-2">
+                                                    <div class="home-search-form col-12 position-relative  mb-4">
+                                                        <h5 class="fw-bold">Your Delivery Address</h5>
+                                                        <div class="input-group position-relative rounded-pill">
+                                                            <input type="text" class="form-control home-search-input fw-bold py-3"
+                                                                style="padding-left:1rem !important; -webkit-appearance: textfield;height:56px !important;font-size:1.4rem;color:#000 !important;"
+                                                                placeholder="Please give your postcode, city or area name."
+                                                                id="place-input" name="location" autocomplete="off" />
+                                                            <i class="fa-solid fa-times clear-input-icon position-absolute justify-content-center align-items-center  rounded-circle"
+                                                                style="right: 49px; top: 50%; transform: translateY(-50%); cursor: pointer; display: none; z-index: 10; color: #000; border:1px solid red;height:25px !important; width:25px !important"></i>
+                                                            <button class="btn btn-primary home-search-button text-white disabled"
+                                                                disabled id="search-loc"> <i
+                                                                    class="fa-solid fa-location-dot"></i></button>
+                                                        </div>
+                                                        <div class="text-center position-relative mt-2 card py-1 rounded-pill">
+                                                            <span id="getMyAddress"
+                                                                style="cursor:pointer; color:red; font-size:1.4rem;">
+                                                                <i class="fa-solid fa-location-crosshairs mx-2 "></i> Click here get
+                                                                current location
+                                                            </span>
+                                                        </div>
+                                                        <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+                                                    </div>
 
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="street" class="fw-bold">Street <span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" id="street" name="street"
+                                                                class="form-control form-control-lg" value="{{session('street')}}"
+                                                                placeholder="Street" readonly>
+                                                            @error('street')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
 
-                                        <div class="row mt-2">
-                                            <div class="home-search-form col-12 position-relative  mb-4">
-                                                <h5 class="fw-bold">Your Delivery Address</h5>
-                                                <div class="input-group position-relative rounded-pill">
-                                                    <input type="text" class="form-control home-search-input fw-bold py-3"
-                                                        style="padding-left:1rem !important; -webkit-appearance: textfield;height:56px !important;font-size:1.4rem;color:#000 !important;"
-                                                        placeholder="Please give your postcode, city or area name."
-                                                        id="place-input" name="location" autocomplete="off" />
-                                                    <i class="fa-solid fa-times clear-input-icon position-absolute justify-content-center align-items-center  rounded-circle"
-                                                        style="right: 49px; top: 50%; transform: translateY(-50%); cursor: pointer; display: none; z-index: 10; color: #000; border:1px solid red;height:25px !important; width:25px !important"></i>
-                                                    <button class="btn btn-primary home-search-button text-white disabled"
-                                                        disabled id="search-loc"> <i
-                                                            class="fa-solid fa-location-dot"></i></button>
-                                                </div>
-                                                <div class="text-center position-relative mt-2 card py-1 rounded-pill">
-                                                    <span id="getMyAddress"
-                                                        style="cursor:pointer; color:red; font-size:1.4rem;">
-                                                        <i class="fa-solid fa-location-crosshairs mx-2 "></i> Click here get
-                                                        current location
-                                                    </span>
-                                                </div>
-                                                <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
-                                            </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="house_number" class="fw-bold">House Number</label>
+                                                            <input type="text" id="house_number" name="house_number"
+                                                                class="form-control form-control-lg" placeholder="House Number"
+                                                                value="{{session('street_number') ?? null}}" required>
+                                                            @error('house_number')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
 
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="postal_code" class="fw-bold">Postal Code <span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" id="postal_code" name="postal_code"
+                                                                class="form-control form-control-lg" placeholder="Postal code"
+                                                                value="{{session('postcode')}}" readonly>
+                                                            <input type="hidden" id="latitude" name="latitude"
+                                                                value="{{session('latitude')}}" readonly>
+                                                            <input type="hidden" id="longitude" name="longitude"
+                                                                value="{{session('longitude')}}" readonly>
+                                                            @error('postal_code')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
 
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="city" class="fw-bold">City <span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" id="city" name="city"
+                                                                class="form-control form-control-lg" placeholder="City"
+                                                                value="{{session('city')}}" readonly>
+                                                            @error('city')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="city_district" class="fw-bold">City District </label>
+                                                            <input type="text" id="city_district" name="city_district"
+                                                                class="form-control form-control-lg" value="{{session('sublocality')}}"
+                                                                placeholder="City District.." readonly>
+                                                            @error('city_district')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
 
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="street" class="fw-bold">Street <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="street" name="street"
-                                                        class="form-control form-control-lg" value="{{session('street')}}"
-                                                        placeholder="Street" readonly>
-                                                    @error('street')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="floor" class="fw-bold">Building storey <span
+                                                                    class="text-danger">*</span></label>
+                                                            <select id="floor" name="building_storey" class="my-select" required>
+                                                                <option value="" disabled selected>Select building storey</option>
+                                                                <option value="Basement floor">Basement floor</option>
+                                                                <option value="Ground floor">Ground floor</option>
+                                                                @for ($i = 1; $i <= 20; $i++)
+                                                                    <option value="{{ $i }} Floor">{{ $i }}: Floor</option>
+                                                                @endfor
+                                                            </select>
+                                                            @error('building_storey')
+                                                                <small class="text-danger">{{ $message }}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
 
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="house_number" class="fw-bold">House Number</label>
-                                                    <input type="text" id="house_number" name="house_number"
-                                                        class="form-control form-control-lg" placeholder="House Number"
-                                                        value="{{session('street_number') ?? null}}" required>
-                                                    @error('house_number')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="postal_code" class="fw-bold">Postal Code <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="postal_code" name="postal_code"
-                                                        class="form-control form-control-lg" placeholder="Postal code"
-                                                        value="{{session('postcode')}}" readonly>
-                                                    <input type="hidden" id="latitude" name="latitude"
-                                                        value="{{session('latitude')}}" readonly>
-                                                    <input type="hidden" id="longitude" name="longitude"
-                                                        value="{{session('longitude')}}" readonly>
-                                                    @error('postal_code')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="city" class="fw-bold">City <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="city" name="city"
-                                                        class="form-control form-control-lg" placeholder="City"
-                                                        value="{{session('city')}}" readonly>
-                                                    @error('city')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="city_district" class="fw-bold">City District </label>
-                                                    <input type="text" id="city_district" name="city_district"
-                                                        class="form-control form-control-lg" value="{{session('sublocality')}}"
-                                                        placeholder="City District.." readonly>
-                                                    @error('city_district')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="floor" class="fw-bold">Building storey <span
-                                                            class="text-danger">*</span></label>
-
-                                                    <select id="floor" name="building_storey" class="my-select" required>
-                                                        <option value="" disabled selected>Select building storey</option>
-
-                                                        <option value="Basement floor">Basement floor</option>
-                                                        <option value="Ground floor">Ground floor</option>
-
-                                                        @for ($i = 1; $i <= 20; $i++)
-                                                            <option value="{{ $i }} Floor">{{ $i }}: Floor</option>
-                                                        @endfor
-
-                                                    </select>
-
-                                                    @error('building_storey')
-                                                        <small class="text-danger">{{ $message }}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="company_name" class="fw-bold">Company name (Optional)</label>
-                                                    <input type="text" id="company_name" name="company_name"
-                                                        class="form-control form-control-lg" placeholder="Company name">
-                                                    @error('company_name')
-                                                        <small class="text-danger">{{$message}}</small>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-3">
-                                                    <label for="phone" class="fw-bold">Please select your delivery/pickup
-                                                        time</label>
-                                                    <div class="input-group flex-nowrap">
-                                                        <span class="input-group-text px-2">
-                                                            <i class="fa-regular text-primary fs-3 fa-clock"></i>
-                                                        </span>
-                                                        <select name="custome_time" id="seachable-select" class=" my-select">
-                                                            <option value="As soon as possible">As soon as possible</option>
-                                                            @foreach ($slots as $slot)
-                                                                <option value="{{ $slot }}">
-                                                                    {{ date('h:i A', strtotime($slot)) }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="company_name" class="fw-bold">Company name (Optional)</label>
+                                                            <input type="text" id="company_name" name="company_name"
+                                                                class="form-control form-control-lg" placeholder="Company name">
+                                                            @error('company_name')
+                                                                <small class="text-danger">{{$message}}</small>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="phone" class="fw-bold">Please select your delivery/pickup
+                                                                time</label>
+                                                            <div class="input-group flex-nowrap">
+                                                                <span class="input-group-text px-2">
+                                                                    <i class="fa-regular text-primary fs-3 fa-clock"></i>
+                                                                </span>
+                                                                <select name="custome_time" id="seachable-select" class=" my-select">
+                                                                    <option value="As soon as possible">As soon as possible</option>
+                                                                    @foreach ($slots as $slot)
+                                                                        <option value="{{ $slot }}">
+                                                                            {{ date('h:i A', strtotime($slot)) }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-check mb-3">
+                                                            <input type="checkbox" class="form-check-input" id="save_details_next"
+                                                                name="save_details_next">
+                                                            <label for="save_details_next" class="form-check-label fw-bold">Do you want
+                                                                to save this address?</label>
+                                                        </div>
+                                                        @error('save_details_next')
+                                                            <small class="text-danger">{{$message}}</small>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12">
-                                                <div class="form-check mb-3">
-                                                    <input type="checkbox" class="form-check-input" id="save_details_next"
-                                                        name="save_details_next">
-                                                    <label for="save_details_next" class="form-check-label fw-bold">Do you want
-                                                        to save this address?</label>
-                                                </div>
-                                                @error('save_details_next')
-                                                    <small class="text-danger">{{$message}}</small>
-                                                @enderror
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                @else
-                                    <div class="col-md-12 mb-3">
-                                        <div class="card shadow border-0">
-                                            <div class="card-body">
-                                                <h5 class="fs-2 fw-bold">Here You Can Pickup Your Order.</h5>
-                                                <!-- Address Section -->
-
-                                                <h6 class="mt-3 fs-1"><strong><i class="fas fa-map-marker-alt me-2"></i>
-                                                        Address:</strong></h6>
-                                                <h6 class="mt-3 fs-1"><strong><i
-                                                            class="fa-solid fa-shop me-2"></i>{{$vendor->name}}</strong></h6>
-                                                <p class="mb-1 fs-1">
-                                                    @isset($restDetails)
-                                                        {{ $restDetails->company_street ?? 'Street not available' }},
-                                                        <br />
-                                                        {{ $restDetails->company_zipcode ?? 'Zipcode not available' }}
-
-                                                        {{ $restDetails->company_city ?? 'City not available' }},
-                                                        <br />
-                                                        {{ $restDetails->company_state ?? '' }}
-                                                    @else
-                                                        Address not available
-                                                    @endisset
-                                                </p>
-
-                                                <!-- Contact Information -->
-                                                <h6 class="mt-3 fs-1"><strong><i class="fas fa-tty me-2"></i> Contact
-                                                        Information:</strong></h6>
-                                                <p class="mb-1 fs-1">
-                                                    @isset($vendor->phone)
-                                                        <i class="fas fa-phone-alt me-2"></i> Phone: {{ $vendor->phone }}
-                                                    @else
-                                                        Phone number not available
-                                                    @endisset
-                                                </p>
-                                                <p class="mb-1 fs-1">
-                                                    @isset($vendor->email)
-                                                        <i class="fas fa-envelope me-2"></i> Email: {{ $vendor->email }}
-                                                    @else
-                                                        Email not available
-                                                    @endisset
-                                                </p>
-                                                <p class="mb-1 fs-1">
-                                                    <i class="fas fa-globe me-2"></i> Url: <a class="text-primary"
-                                                        target="_blank"
-                                                        href="{{$restDetails->shop_url}}">{{$restDetails->shop_url}}</a>
-                                                </p>
-                                            </div>
-                                            <div class="card-body">
-                                                <iframe
-                                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7005.14247513045!2d77.39483454999998!3d28.6126369!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cef9166ea02d7%3A0x9a32f1a301ccc430!2sSector%2069%2C%20Noida%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1708586070667!5m2!1sen!2sin"
-                                                    style="border: 0; width: 100%; height: 15rem" allowfullscreen=""
-                                                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                                                    id="mapFrame"></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                                <div class="col-md-12">
-                                    <div class="form-group mb-3">
-                                        <label for="note" class="fw-bold">Note</label>
-                                        <textarea id="note" name="note" rows="1" class="form-control form-control-lg"
-                                            placeholder="Note"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-12 my-3">
-                                    <h5 class="text-uppercase fw-bold">Personal Details</h5>
-                                    <hr>
-                                </div>
-                                @php
-                                    $name = explode(' ', $user->name);
-
-                                @endphp
-                                <div class="col-md-6 mb-3">
-                                    <label for="first_name" class="fw-bold">First Name <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" id="first_name" name="first_name"
-                                        class="form-control form-control-lg" placeholder="First Name"
-                                        value="{{ isset($name[0]) ? $name[0] : '' }}">
-                                    @error('first_name')
-                                        <small class="text-danger"> {{ $message }} </small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="last_name" class="fw-bold">Last Name <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" id="last_name" name="last_name" class="form-control form-control-lg"
-                                        placeholder="Last Name" value="{{ old('last_name', $name[2] ?? '') }}">
-                                    @error('last_name')
-                                        <small class="text-danger"> {{ $message }} </small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="fw-bold">Email Address <span
-                                            class="text-danger">*</span></label>
-                                    <input type="email" id="email" name="email" class="form-control form-control-lg"
-                                        placeholder="Email" value="{{ isset($user->email) ? $user->email : '' }}">
-                                    @error('email')
-                                        <small class="text-danger"> {{ $message }} </small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="phone" class="fw-bold">Phone Number <span
-                                            class="text-danger">*</span></label>
-                                    <input type="tel" id="phone" name="phone" class="form-control form-control-lg"
-                                        placeholder="Phone" value="{{ isset($user->phone) ? $user->phone : '' }}">
-                                    @error('phone')
-                                        <small class="text-danger"> {{ $message }} </small>
-                                    @enderror
-                                </div>
-
-                                <div class="col-12">
-                                    <h5 class="fw-bold text-uppercase mb-4">Select your payment method</h5>
-                                    <input type="hidden" name="del_price" value="{{ $extraCost1 }}">
-                                    <div
-                                        class="payment-methods d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
-                                        <label class="payment-card" for="paypal">
-                                            <input checked type="radio" name="paymentMethod" id="paypal" value="paypal">
-                                            <div class="card-content  shadow-sm">
-                                                <div class="checkmark">
-                                                    <svg viewBox="0 0 24 24">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                                    </svg>
-                                                </div>
-                                                <img src="{{ asset('uploads/online-payment.png') }}" alt="online-payment">
-                                                <span>Online Payment</span>
-                                            </div>
-                                        </label>
-                                        <label class="payment-card" for="cash">
-                                            <input type="radio" name="paymentMethod" id="cash" value="cash">
-                                            <div class="card-content shadow-sm">
-                                                <div class="checkmark">
-                                                    <svg viewBox="0 0 24 24">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                                    </svg>
-                                                </div>
-                                                <img src="{{ asset('uploads/money.png') }}" alt="Cash">
-                                                <span>Cash Payment</span>
-                                            </div>
-                                        </label>
-                                        <label class="payment-card" for="debit_card_at_home">
-                                            <input type="radio" name="paymentMethod" id="debit_card_at_home"
-                                                value="card_payment">
-                                            <div class="card-content shadow-sm">
-                                                <div class="checkmark">
-                                                    <svg viewBox="0 0 24 24">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                                    </svg>
-                                                </div>
-                                                <img src="{{ asset('uploads/pos-terminal.png') }}" alt="debit_card_at_home">
-                                                <span class="text-center">Debit Card at home</span>
-                                            </div>
-                                        </label>
-                                        <label class="payment-card" for="stripe">
-                                            <input type="radio" name="paymentMethod" id="stripe" value="stripe">
-                                            <div class="card-content shadow-sm">
-                                                <div class="checkmark">
-                                                    <svg viewBox="0 0 24 24">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                                    </svg>
-                                                </div>
-                                                <div
-                                                    style="width:60px;height:40px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
-                                                    <img src="{{ asset('stripe.png') }}" alt="stripe">
-                                                </div>
-                                                <span class="ms-1">Stripe</span>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 ">
-                    <div class="card border-0">
-                        <div class="card-body">
-                            <h5 class="fw-bold text-uppercase">Order Details</h5>
-                            <hr>
-                            <div class="row">
-                                <div class="col-12 px-0 mb-3">
-                                    <ul class="list px-0 mx-0">
-                                        @php
-                                            $totalPrice = 0;
-
-                                        @endphp
-                                        @foreach ($carts as $cart)
-                                            @php
-                                                $totalPrice += $cart->total_price;
-                                                if ($cart->food == null) {
-                                                    $foodName = $cart->food_item->food_item_name;
-                                                } else {
-                                                    $foodName = $cart->food->name;
-                                                }
-                                                $variantName = isset($cart->variant->variant_item->name)
-                                                    ? $cart->variant->variant_item->name
-                                                    : '';
-                                            @endphp
-                                            <li class="w-100">
-                                                <div class="d-flex flex-column w-100">
-
-                                                    <div class="d-flex justify-content-between w-100  align-items-center">
-                                                        <h6 class="mb-0 " style="font-size:16px;">{{ $cart->quantity }} <span
-                                                                class="text-muted">x</span> {{ $foodName }} :
-                                                            {{ $variantName }}
-                                                        </h6>
-                                                        <span class="fw-bold"
-                                                            style="white-space: nowrap;">{{ number_format($cart->total_price, 2) }}€</span>
+                                        @else
+                                            <div class="col-md-12 mb-3">
+                                                <div class="card shadow border-0">
+                                                    <div class="card-body">
+                                                        <h5 class="fs-2 fw-bold">Here You Can Pickup Your Order.</h5>
+                                                        <h6 class="mt-3 fs-1"><strong><i class="fas fa-map-marker-alt me-2"></i>
+                                                                Address:</strong></h6>
+                                                        <h6 class="mt-3 fs-1"><strong><i
+                                                                    class="fa-solid fa-shop me-2"></i>{{$vendor->name}}</strong></h6>
+                                                        <p class="mb-1 fs-1">
+                                                            @isset($restDetails)
+                                                                {{ $restDetails->company_street ?? 'Street not available' }},
+                                                                <br />
+                                                                {{ $restDetails->company_zipcode ?? 'Zipcode not available' }}
+                                                                {{ $restDetails->company_city ?? 'City not available' }},
+                                                                <br />
+                                                                {{ $restDetails->company_state ?? '' }}
+                                                            @else
+                                                                Address not available
+                                                            @endisset
+                                                        </p>
+                                                        <h6 class="mt-3 fs-1"><strong><i class="fas fa-tty me-2"></i> Contact
+                                                                Information:</strong></h6>
+                                                        <p class="mb-1 fs-1">
+                                                            @isset($vendor->phone)
+                                                                <i class="fas fa-phone-alt me-2"></i> Phone: {{ $vendor->phone }}
+                                                            @else
+                                                                Phone number not available
+                                                            @endisset
+                                                        </p>
+                                                        <p class="mb-1 fs-1">
+                                                            @isset($vendor->email)
+                                                                <i class="fas fa-envelope me-2"></i> Email: {{ $vendor->email }}
+                                                            @else
+                                                                Email not available
+                                                            @endisset
+                                                        </p>
+                                                        <p class="mb-1 fs-1">
+                                                            <i class="fas fa-globe me-2"></i> Url: <a class="text-primary"
+                                                                target="_blank"
+                                                                href="{{$restDetails->shop_url}}">{{$restDetails->shop_url}}</a>
+                                                        </p>
                                                     </div>
-
-                                                    @php
-
-                                                        $extrasOrder = json_decode($cart->extras, true);
-                                                        if (!is_array($extrasOrder)) {
-                                                            $extrasOrder = [];
-                                                        }
-                                                        $sortedItems = collect($extrasOrder)->map(function ($extraId) use ($cart) {
-                                                            return collect($cart->collection_items)->firstWhere('id', $extraId);
-                                                        })->filter();
-                                                    @endphp
-
-                                                    <ul id="combinedItems_{{ $loop->index }}" class="px-0 mx-0"
-                                                        style="list-style:none;">
-                                                        @foreach ($sortedItems as $index => $item)
-                                                            <li class="{{ $index >= 2 ? 'extra-item' : '' }}">
-                                                                + {{ $item->sub_items->name }}
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                    @if ($sortedItems->count() > 2)
-                                                        <a class="text-primary fw-bold" id="showMoreBtn_{{ $loop->index }}"
-                                                            onclick="toggleItems('combinedItems_{{ $loop->index }}', 'showMoreBtn_{{ $loop->index }}')"
-                                                            data-state="collapsed" style="cursor:pointer;font-size:15px;">+ Show
-                                                            More</a>
-
-                                                    @endif
+                                                    <div class="card-body">
+                                                        <iframe
+                                                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7005.14247513045!2d77.39483454999998!3d28.6126369!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cef9166ea02d7%3A0x9a32f1a301ccc430!2sSector%2069%2C%20Noida%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1708586070667!5m2!1sen!2sin"
+                                                            style="border: 0; width: 100%; height: 15rem" allowfullscreen=""
+                                                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                                                            id="mapFrame"></iframe>
+                                                    </div>
                                                 </div>
-
-                                            </li>
-                                            <input type="hidden" name="cart[]" value="{{ $cart->id }}">
-                                        @endforeach
-                                        <hr>
-                                        <li class="fw-bold"><strong>Sub Total </strong>
-                                            <span>{{ number_format($totalPrice, 2) }}€</span>
-                                        </li>
-                                        @if($totalDiscount > 0)
-                                            <li class="fw-bold"><strong>Discount </strong> <span
-                                                    class="text-success">-{{ number_format($totalDiscount, 2) }}€</span>
-                                            </li>
+                                            </div>
                                         @endif
-                                        <li class="fw-bold"><strong>
-                                                @if (isset($method) && $method == 'delivery')
-                                                    Delivery Charge
-                                                @else
-                                                    Pickup Charge
-                                                @endif
-                                            </strong>
-                                            @if($isNotDeliverable)
-                                                <span class="text-danger">Delivery not available</span>
-                                            @else
-                                                <span>{{ $extraCost1 == 0 ? 'Free' : number_format($extraCost1, 2) . '€' }}</span>
-                                            @endif
-                                        </li>
-                                        <li class="fw-bold"><strong>Total Price </strong>
-                                            <span>{{ number_format($totalPrice + $extraCost1 - $totalDiscount, 2) }}€</span>
-                                        </li>
+                                        <div class="col-md-12">
+                                            <div class="form-group mb-3">
+                                                <label for="note" class="fw-bold">Note</label>
+                                                <textarea id="note" name="note" rows="1" class="form-control form-control-lg"
+                                                    placeholder="Note"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 my-3">
+                                            <h5 class="text-uppercase fw-bold">Personal Details</h5>
+                                            <hr>
+                                        </div>
+                                        @php
+                                            $name = explode(' ', $user->name);
+                                        @endphp
+                                        <div class="col-md-6 mb-3">
+                                            <label for="first_name" class="fw-bold">First Name <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" id="first_name" name="first_name"
+                                                class="form-control form-control-lg" placeholder="First Name"
+                                                value="{{ isset($name[0]) ? $name[0] : '' }}">
+                                            @error('first_name')
+                                                <small class="text-danger"> {{ $message }} </small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="last_name" class="fw-bold">Last Name <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" id="last_name" name="last_name" class="form-control form-control-lg"
+                                                placeholder="Last Name" value="{{ old('last_name', $name[2] ?? '') }}">
+                                            @error('last_name')
+                                                <small class="text-danger"> {{ $message }} </small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="fw-bold">Email Address <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="email" id="email" name="email" class="form-control form-control-lg"
+                                                placeholder="Email" value="{{ isset($user->email) ? $user->email : '' }}">
+                                            @error('email')
+                                                <small class="text-danger"> {{ $message }} </small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="phone" class="fw-bold">Phone Number <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="tel" id="phone" name="phone" class="form-control form-control-lg"
+                                                placeholder="Phone" value="{{ isset($user->phone) ? $user->phone : '' }}">
+                                            @error('phone')
+                                                <small class="text-danger"> {{ $message }} </small>
+                                            @enderror
+                                        </div>
 
-                                    </ul>
-                                </div>
-                                <div class="col-12 ">
-                                    <div class="d-flex align-items-center ">
-                                        <input type="checkbox" name="accept_terms_condition" id="accept_terms_condition">
-                                        <label for="accept_terms_condition" class="ms-2 mb-0">I accept the terms &
-                                            conditions and privacy policy.</label>
+                                        <div class="col-12">
+                                            <h5 class="fw-bold text-uppercase mb-4">Select your payment method</h5>
+                                            <input type="hidden" name="del_price" value="{{ $extraCost1 }}">
+                                            <div
+                                                class="payment-methods d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
+                                                <label class="payment-card" for="paypal">
+                                                    <input checked type="radio" name="paymentMethod" id="paypal" value="paypal">
+                                                    <div class="card-content  shadow-sm">
+                                                        <div class="checkmark">
+                                                            <svg viewBox="0 0 24 24">
+                                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                            </svg>
+                                                        </div>
+                                                        <img src="{{ asset('uploads/logo/paypal.png') }}" alt="paypal-payment">
+                                                        <span>PayPal</span>
+                                                    </div>
+                                                </label>
+                                                <label class="payment-card" for="cash">
+                                                    <input type="radio" name="paymentMethod" id="cash" value="cash">
+                                                    <div class="card-content shadow-sm">
+                                                        <div class="checkmark">
+                                                            <svg viewBox="0 0 24 24">
+                                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                            </svg>
+                                                        </div>
+                                                        <img src="{{ asset('uploads/money.png') }}" alt="Cash">
+                                                        <span>Cash Payment</span>
+                                                    </div>
+                                                </label>
+                                                <label class="payment-card" for="debit_card_at_home">
+                                                    <input type="radio" name="paymentMethod" id="debit_card_at_home"
+                                                        value="card_payment">
+                                                    <div class="card-content shadow-sm">
+                                                        <div class="checkmark">
+                                                            <svg viewBox="0 0 24 24">
+                                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                            </svg>
+                                                        </div>
+                                                        <img src="{{ asset('uploads/pos-terminal.png') }}" alt="debit_card_at_home">
+                                                        <span class="text-center">Debit Card at home</span>
+                                                    </div>
+                                                </label>
+                                                <label class="payment-card" for="stripe">
+                                                    <input type="radio" name="paymentMethod" id="stripe" value="stripe">
+                                                    <div class="card-content shadow-sm">
+                                                        <div class="checkmark">
+                                                            <svg viewBox="0 0 24 24">
+                                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                            </svg>
+                                                        </div>
+                                                        <div
+                                                            style="width:60px;height:40px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                                                            <img src="{{ asset('stripe.png') }}" alt="stripe">
+                                                        </div>
+                                                        <span class="ms-1">Stripe</span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    @error('accept_terms_condition')
-                                        <small class="text-danger"> {{ $message }} </small>
-                                    @enderror
                                 </div>
-                                @if (isset($isReady) && !$isNotDeliverable)
-                                    <div class="col-12 mt-2">
-                                        <button type="submit" class="btn btn-primary fw-bold w-100">Order Now
-                                            {{ number_format($totalAmount + $extraCost1 - $totalDiscount, 2) }}€</button>
-                                    </div>
-                                    <p class="text-dark text-center">Secure Payment With PayPal</p>
-                                @else
-                                    <span class="text-danger w-100 text-center btn btn-light disabled fw-bold">Delivery not
-                                        available</span>
-                                @endif
                             </div>
                         </div>
                     </div>
+                    {{-- END LEFT SCROLLABLE COLUMN --}}
+
+                    {{-- RIGHT STICKY COLUMN --}}
+                    <div class="sticky-column">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-uppercase">Order Details</h5>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-12 px-0 mb-3">
+                                        <ul class="list px-0 mx-0">
+                                            @php
+                                                $totalPrice = 0;
+                                            @endphp
+                                            @foreach ($carts as $cart)
+                                                @php
+                                                    $totalPrice += $cart->total_price;
+                                                    if ($cart->food == null) {
+                                                        $foodName = $cart->food_item->food_item_name;
+                                                    } else {
+                                                        $foodName = $cart->food->name;
+                                                    }
+                                                    $variantName = isset($cart->variant->variant_item->name)
+                                                        ? $cart->variant->variant_item->name
+                                                        : '';
+                                                @endphp
+                                                <li class="w-100">
+                                                    <div class="d-flex flex-column w-100">
+                                                        <div class="d-flex justify-content-between w-100  align-items-center">
+                                                            <h6 class="mb-0 " style="font-size:16px;">{{ $cart->quantity }} <span
+                                                                    class="text-muted">x</span> {{ $foodName }} :
+                                                                {{ $variantName }}
+                                                            </h6>
+                                                            <span class="fw-bold"
+                                                                style="white-space: nowrap;">{{ number_format($cart->total_price, 2) }}€</span>
+                                                        </div>
+
+                                                        @php
+                                                            $extrasOrder = json_decode($cart->extras, true);
+                                                            if (!is_array($extrasOrder)) {
+                                                                $extrasOrder = [];
+                                                            }
+                                                            $sortedItems = collect($extrasOrder)->map(function ($extraId) use ($cart) {
+                                                                return collect($cart->collection_items)->firstWhere('id', $extraId);
+                                                            })->filter();
+                                                        @endphp
+
+                                                        <ul id="combinedItems_{{ $loop->index }}" class="px-0 mx-0"
+                                                            style="list-style:none;">
+                                                            @foreach ($sortedItems as $index => $item)
+                                                                <li class="{{ $index >= 2 ? 'extra-item' : '' }}">
+                                                                    + {{ $item->sub_items->name }}
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                        @if ($sortedItems->count() > 2)
+                                                            <a class="text-primary fw-bold" id="showMoreBtn_{{ $loop->index }}"
+                                                                onclick="toggleItems('combinedItems_{{ $loop->index }}', 'showMoreBtn_{{ $loop->index }}')"
+                                                                data-state="collapsed" style="cursor:pointer;font-size:15px;">+ Show
+                                                                More</a>
+                                                        @endif
+                                                    </div>
+                                                </li>
+                                                <input type="hidden" name="cart[]" value="{{ $cart->id }}">
+                                            @endforeach
+                                            <hr>
+                                            <li class="fw-bold"><strong>Sub Total </strong>
+                                                <span>{{ number_format($totalPrice, 2) }}€</span>
+                                            </li>
+                                            @if($totalDiscount > 0)
+                                                <li class="fw-bold"><strong>Discount </strong> <span
+                                                        class="text-success">-{{ number_format($totalDiscount, 2) }}€</span>
+                                                </li>
+                                            @endif
+                                            <li class="fw-bold"><strong>
+                                                    @if (isset($method) && $method == 'delivery')
+                                                        Delivery Charge
+                                                    @else
+                                                        Pickup Charge
+                                                    @endif
+                                                </strong>
+                                                @if($isNotDeliverable)
+                                                    <span class="text-danger">Delivery not available</span>
+                                                @else
+                                                    <span>{{ $extraCost1 == 0 ? 'Free' : number_format($extraCost1, 2) . '€' }}</span>
+                                                @endif
+                                            </li>
+                                            <li class="fw-bold"><strong>Total Price </strong>
+                                                <span>{{ number_format($totalPrice + $extraCost1 - $totalDiscount, 2) }}€</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-12 ">
+                                        <div class="d-flex align-items-center ">
+                                            <input type="checkbox" name="accept_terms_condition" id="accept_terms_condition">
+                                            <label for="accept_terms_condition" class="ms-2 mb-0">I accept the terms &
+                                                conditions and privacy policy.</label>
+                                        </div>
+                                        @error('accept_terms_condition')
+                                            <small class="text-danger"> {{ $message }} </small>
+                                        @enderror
+                                    </div>
+                                    @if (isset($isReady) && !$isNotDeliverable)
+                                        <div class="col-12 mt-2">
+                                            <button type="submit" class="btn btn-primary fw-bold w-100">Order Now
+                                                {{ number_format($totalAmount + $extraCost1 - $totalDiscount, 2) }}€</button>
+                                        </div>
+                                        <p class="text-dark text-center">Secure Payment With PayPal</p>
+                                    @else
+                                        <span class="text-danger w-100 text-center btn btn-light disabled fw-bold">Delivery not
+                                            available</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- END RIGHT STICKY COLUMN --}}
                 </div>
+                {{-- END CHECKOUT WRAPPER --}}
             </form>
         </div>
     </section>
-
-
 
     @if($method != 'delivery')
         <script>
@@ -1045,19 +1111,12 @@
             var locationx = `${street} ${city}, ${state}, ${country}, ${zipcode}`;
             var source_src =
                 `https://www.google.com/maps/embed/v1/place?key=AIzaSyAonK15hotzDslX4ePjIbmizRii-7Ng4QE&q=${encodeURIComponent(locationx)}`;
-            // console.log(source_src);
             document.getElementById('mapFrame').src = source_src;
         </script>
     @endif
-    <style>
-        .extra-item {
-            display: none;
-        }
-    </style>
 @endsection
 
 @section('external-js')
-
     <script>
         // Removed visibilitychange reload script as it caused the page to refresh 
         // on iOS when selecting inputs or payment options.
@@ -1327,13 +1386,6 @@
                             return;
                         }
 
-                        // if (!locationData.sublocality && !locationData.street) {
-                        //     showError('Please enter street name.');
-                        //     input.value= input.value.trim()+"  ";
-                        //     highlightInput(true);
-                        //     return;
-                        // }
-
                         if (!locationData.postalCode) {
                             showError('Please enter postalcode.');
                             input.value = input.value.trim() + "  ";
@@ -1356,10 +1408,6 @@
                 const component = place.address_components.find(c => c.types.includes(type));
                 return component ? component.long_name : '';
             }
-
-
-
-
 
             function highlightInput(isError) {
                 // if (isError) {

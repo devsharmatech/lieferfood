@@ -3,104 +3,278 @@
     Admin Dashboard
 @endsection
 @section('admin_body')
+    <style>
+   .state .icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+}
+
+.state .card-hover {
+    transition: all 0.3s ease;
+}
+
+.state .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.state .card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+</style>
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
-            <div class="col-lg-12 mb-4 ">
+            <!-- Welcome Card -->
+            <div class="col-12 mb-4">
                 <div class="card">
-                    <div class="d-flex align-items-end row">
-                        <div class="col-sm-7">
+                    <div class="d-flex flex-column flex-md-row align-items-end">
+                        <div class="col-md-7 col-12 order-2 order-md-1">
                             <div class="card-body">
-                                <h5 class="card-title text-primary">Congratulations {{ auth()->user()->name }}! 🎉</h5>
+                                <h5 class="card-title text-primary">Congratulations {{auth()->user()->name}}! 🎉</h5>
                                 <div>
                                     <p class="mb-2">
-                                        {{ $quote }}
+                                        {{$quote}}
                                     </p>
-                                    <small class="text-muted mb-2 d-block">- {{ $author }}</small>
+                                    <small class="text-dark mb-2 d-block">- {{$author}}</small>
                                 </div>
+                                
                             </div>
                         </div>
-                        <div class="col-sm-5 text-center text-sm-left">
-                            <div class="card-body pb-0 px-0 px-md-4">
-                                <img src="{{ asset('uploads/restu.svg') }}" height="140" alt="Restaurant" />
+                        <div class="col-md-5 col-12 order-1 order-md-2">
+                            <div class="card-body text-md-left text-center pb-0 px-0 px-md-4 ">
+                                <img src="{{ asset('uploads/restu.svg') }}"
+                                    height="140" alt="Restaurant" style="height:8rem;" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Stats Cards -->
+<div class="col-12">
+    <div class="row state">
 
-
-
-            <div class="col-12">
-                <div class="row">
-                    <div class="col-sm-3 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('uploads/icon-free/calendar.png') }}" alt="Order Today"
-                                            class="rounded" />
-                                    </div>
-
-                                </div>
-                                <span class="d-block mb-1">Orders Today</span>
-                                <h3 class="card-title text-nowrap mb-2">{{ number_format($todayOrders) }}</h3>
-
-                            </div>
+        {{-- Orders Today --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box bg-primary mx-auto">
+                            <i class="fa-solid fa-calendar-day"></i>
                         </div>
+                        <span class="text-dark d-block mt-2">Orders Today</span>
+                        <h4 class="mb-0">{{ $todayOrders ?? 0 }}</h4>
                     </div>
-                    <div class="col-sm-3 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('uploads/icon-free/schedule.png') }}" alt="Pending Orders"
-                                            class="rounded" />
-                                    </div>
-
-                                </div>
-                                <span class="fw-medium d-block mb-1">Pending Orders</span>
-                                <h3 class="card-title mb-2">{{ number_format($todayPendingOrders) }}</h3>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('uploads/icon-free/price.png') }}" alt="Today’s Revenue"
-                                            class="rounded" />
-                                    </div>
-
-                                </div>
-                                <span class="fw-medium d-block mb-1">Today’s Revenue</span>
-                                <h3 class="card-title mb-2">&euro;{{ number_format($todayRevenue, 2) }}</h3>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('uploads/icon-free/cancel-order.png') }}"
-                                            alt="Today's cancel Order" class="rounded" />
-                                    </div>
-
-                                </div>
-                                <span>Today's cancel Order</span>
-                                <h3 class="card-title text-nowrap mb-2">{{ number_format($todayCancelledOrders) }}</h3>
-
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
+            </a>
         </div>
 
+        {{-- Pending Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders',['status'=>'pending']) }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box bg-warning mx-auto">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Pending Orders</span>
+                        <h4 class="mb-0">{{ $todayPendingOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Cancelled Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders',['status'=>'cancelled']) }}" class="card-link">
+                <div class="card h-100 card-hover ">
+                    <div class="card-body text-center">
+                        <div class="icon-box bg-danger mx-auto">
+                            <i class="fa-solid fa-xmark-circle"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Cancelled Today</span>
+                        <h4 class="mb-0">{{ $todayCancelledOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Today Revenue --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-success">
+                            <i class="fa-solid fa-euro-sign"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Today Revenue</span>
+                        <h4 class="mb-0">€{{ number_format($todayRevenue ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Weekly Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-info">
+                            <i class="fa-solid fa-calendar-week"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Weekly Orders</span>
+                        <h4 class="mb-0">{{ $weeklyOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Monthly Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-secondary">
+                            <i class="fa-solid fa-calendar"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Monthly Orders</span>
+                        <h4 class="mb-0">{{ $monthlyOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Delivered Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders',['status'=>'delivered']) }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-success">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Delivered Orders</span>
+                        <h4 class="mb-0">{{ $deliveredOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{-- Delivery Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders',['method_type'=>'delivery']) }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-info">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Delivery Orders</span>
+                        <h4 class="mb-0">{{ $deliveryOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{-- Pickup Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders',['method_type'=>'pickup']) }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-info">
+                            <i class="fa-solid fa-store-alt"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Pickup Orders</span>
+                        <h4 class="mb-0">{{ $pickupOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{-- Restaurant Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.table.bookings') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-info">
+                            <i class="fa-solid fa-chair"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Restaurant Table Bookings</span>
+                        <h4 class="mb-0">{{ $pickupOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        {{-- Total Orders --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-warning">
+                            <i class="fa-solid fa-bucket"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Total Orders</span>
+                        <h4 class="mb-0">{{ $totalOrders ?? 0 }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Weekly Revenue --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-info">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Weekly Revenue</span>
+                        <h4 class="mb-0">€{{ number_format($weeklyRevenue ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Monthly Revenue --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-dark">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Monthly Revenue</span>
+                        <h4 class="mb-0">€{{ number_format($monthlyRevenue ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Average Order Value --}}
+        <div class="col-6 col-md-3 mb-4">
+            <a href="{{ route('admin.all.orders') }}" class="card-link">
+                <div class="card h-100 card-hover">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto bg-warning">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <span class="text-dark d-block mt-2">Avg Order Value</span>
+                        <h4 class="mb-0">€{{ number_format($avgOrderValue ?? 0, 2) }}</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        
+
     </div>
+</div>
+
+
+        </div>
+    </div>             
 @endsection

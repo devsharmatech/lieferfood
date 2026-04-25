@@ -134,11 +134,15 @@ Route::middleware(['role:admin'])->group(function () {
   });
   Route::controller(allOrderController::class)->prefix('admin')->group(function () {
     Route::get('/orders', 'index')->name('admin.all.order');
+    Route::get('/all-orders', 'index')->name('admin.all.orders');
     Route::post('/order-status', 'updateStatus')->name('admin.order.status');
     Route::get('/order-view/{id}', 'viewOrder')->name('admin.order.view');
     Route::get('/order-pdf/{id}', 'generateOrderPDF')->name('admin.generate.order.pdf');
   });
-
+Route::controller(TableServiceController::class)->prefix('admin')->group(function () {
+   Route::get('/table-bookings', 'admingetTableBooking')->name('admin.table.bookings');
+   Route::post('/table-booking-status', 'admintableStatusChange')->name('admin.tableStatusChange');
+  });
   Route::controller(foodReviewController::class)->prefix('admin')->group(function () {
     Route::get('/food-review', 'index')->name('admin.food.reviews');
     Route::get('/edit-food-review/{id}', 'editReview')->name('admin.edit.food.review');

@@ -8,6 +8,7 @@ use App\Models\category;
 use App\Models\country;
 use App\Models\Order;
 use App\Models\Permission;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\vendor_detail;
 use App\Models\VendorDocument;
@@ -218,11 +219,18 @@ public function dashboard()
         }
     }
 
-    public function updateVendorStatus(Request $request)
+    public function updateVendorStatusMYOLD(Request $request)
     {
         $vendor = vendor_detail::where('vendor_id', $request->vendor_id)->first();
         if ($vendor) {
-            $vendor[$request->col] = $request->restaurant_status;
+            if($request->col=="restaurant_status" && $request->restaurant_status==0){
+                $vendor->isDelivery = 0;
+                $vendor->isPickup = 0;
+                $vendor->restaurant_status = 0;
+            }else{
+                $vendor[$request->col] = $request->restaurant_status;
+            }
+            
             $vendor->save();
 
             return response()->json(['success' => true]);
@@ -231,6 +239,49 @@ public function dashboard()
         return response()->json(['success' => false]);
     }
 
+public function updateVendorStatus(Request $request)
+{
+    $vendor = vendor_detail::where('vendor_id', $request->vendor_id)->first();
+    if (!$vendor) {
+        return response()->json(['success' => false]);
+    }
+    if ($request->col == "restaurant_status" && $request->restaurant_status == 0) {
+        $vendor->isDelivery = 0;
+        $vendor->isPickup = 0;
+        $vendor->restaurant_status = 0;
+
+        // 🔁 Also update opening times table
+        DB::table('vendor_opening_times')
+            ->where('vendor_id', $request->vendor_id)
+            ->update([
+                'is_delivery' => 0,
+                'is_pickup' => 0,
+            ]);
+    } else {
+        
+        $vendor[$request->col] = $request->restaurant_status;
+        
+        if ($request->col == "isPickup") {
+            DB::table('vendor_opening_times')
+                ->where('vendor_id', $request->vendor_id)
+                ->update([
+                    'is_pickup' => $request->restaurant_status
+                ]);
+        }
+
+        if ($request->col == "isDelivery") {
+            DB::table('vendor_opening_times')
+                ->where('vendor_id', $request->vendor_id)
+                ->update([
+                    'is_delivery' => $request->restaurant_status
+                ]);
+        }
+    }
+
+    $vendor->save();
+
+    return response()->json(['success' => true]);
+}
 
     public function index()
     {
